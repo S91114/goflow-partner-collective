@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Goflow Partner Collective — design tokens (light theme).
+   All colors are HSL so Tailwind's hsl(var(--x)) mapping works. */
+@layer base {
+  :root {
+    --background: 220 20% 97%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 40%;
+
+    /* Goflow blue (#536DFE family) */
+    --primary: 233 94% 67%;
+    --primary-foreground: 0 0% 100%;
+
+    --success: 150 72% 38%;
+
+    --border: 214.3 31.8% 89%;
+    --input: 214.3 31.8% 88%;
+    --ring: 233 94% 67%;
+
+    --radius: 0.875rem;
+  }
+
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  body {
+    background: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+      Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+}
