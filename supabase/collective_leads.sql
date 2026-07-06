@@ -1,5 +1,6 @@
 -- Goflow Partner Collective — leads table
--- Run this once in the Supabase SQL editor for the Partner Collective project.
+-- Run this in the Supabase SQL editor for the Partner Collective project.
+-- Safe to run more than once (idempotent).
 -- Project: https://vbeoijigsfemmflfpfni.supabase.co
 
 create table if not exists public.leads (
@@ -10,9 +11,15 @@ create table if not exists public.leads (
   name          text not null,
   email         text not null,
   company       text not null,
+  website       text,
   monthly_units text,
+  details       jsonb not null default '{}'::jsonb,
   source        text not null default 'partner-collective'
 );
+
+-- If the table already existed from V1, add the newer columns.
+alter table public.leads add column if not exists website text;
+alter table public.leads add column if not exists details jsonb not null default '{}'::jsonb;
 
 -- Row Level Security: the public form may INSERT, but only authenticated
 -- users (your Goflow team) may READ the collected leads.

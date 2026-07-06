@@ -9,12 +9,13 @@ type LeadPayload = {
   name?: string;
   email?: string;
   company?: string;
-  monthlyUnits?: string;
+  website?: string;
+  details?: Record<string, string>;
 };
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-/** Where interest notifications are routed. */
+/** Where interest notifications are routed (server-side only, never rendered). */
 const NOTIFY_TO = process.env.COLLECTIVE_NOTIFY_EMAIL || "sadya@goflow.com";
 
 export async function POST(request: Request) {
@@ -30,7 +31,9 @@ export async function POST(request: Request) {
   const name = body.name?.trim();
   const email = body.email?.trim();
   const company = body.company?.trim();
-  const monthlyUnits = body.monthlyUnits?.trim() || null;
+  const website = body.website?.trim() || null;
+  const details =
+    body.details && typeof body.details === "object" ? body.details : {};
 
   if (!offerId || !offerName || !name || !company || !email) {
     return NextResponse.json(
@@ -61,7 +64,8 @@ export async function POST(request: Request) {
       name,
       email,
       company,
-      monthly_units: monthlyUnits,
+      website,
+      details,
       source: "partner-collective",
     });
     if (error) {
@@ -81,7 +85,7 @@ export async function POST(request: Request) {
 
   // Notify the Goflow team by email. Optional — only runs when a Resend API
   // key is configured, so the form works with or without it.
-  await notifyByEmail({ offerName, name, email, company, monthlyUnits });
+  await notifyByEmail({ offerName, name, email, company, website, details });
 
   return NextResponse.json({ ok: true });
 }
@@ -91,13 +95,18 @@ async function notifyByEmail(lead: {
   name: string;
   email: string;
   company: string;
-  monthlyUnits: string | null;
+  website: string | null;
+  details: Record<string, string>;
 }) {
   const apiKey = process.env.RESEND_API_KEY;
   const from =
     process.env.COLLECTIVE_NOTIFY_FROM ||
     "Partner Collective <onboarding@resend.dev>";
   if (!apiKey) return; // Email not configured yet — lead is still saved.
+
+  const detailRows = Object.entries(lead.details)
+    .map(([k, v]) => `<li>${escapeHtml(k)}: ${escapeHtml(v)}</li>`)
+    .join("");
 
   try {
     const res = await fetch("https://api.resend.com/emails", {
@@ -119,7 +128,8 @@ async function notifyByEmail(lead: {
           <ul>
             <li>Email: <a href="mailto:${escapeHtml(lead.email)}">${escapeHtml(lead.email)}</a></li>
             <li>Company: ${escapeHtml(lead.company)}</li>
-            <li>Monthly units: ${escapeHtml(lead.monthlyUnits || "Not specified")}</li>
+            <li>Website: ${escapeHtml(lead.website || "—")}</li>
+            ${detailRows}
           </ul>
         `,
       }),

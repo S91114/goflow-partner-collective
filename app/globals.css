@@ -6,24 +6,26 @@
    All colors are HSL so Tailwind's hsl(var(--x)) mapping works. */
 @layer base {
   :root {
-    --background: 220 20% 97%;
-    --foreground: 222 47% 11%;
+    /* Cool off-white, biased toward the Goflow indigo */
+    --background: 222 32% 97.5%;
+    /* Goflow navy ink (#22354C) */
+    --foreground: 214 38% 19%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 214 38% 19%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 40%;
+    --muted: 220 32% 95%;
+    --muted-foreground: 215 18% 45%;
 
-    /* Goflow blue (#536DFE family) */
-    --primary: 233 94% 67%;
+    /* Goflow indigo (#536DFE) */
+    --primary: 231 99% 66%;
     --primary-foreground: 0 0% 100%;
 
     --success: 150 72% 38%;
 
-    --border: 214.3 31.8% 89%;
-    --input: 214.3 31.8% 88%;
-    --ring: 233 94% 67%;
+    --border: 216 28% 89%;
+    --input: 216 28% 86%;
+    --ring: 231 99% 66%;
 
     --radius: 0.875rem;
   }
