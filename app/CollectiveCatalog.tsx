@@ -69,7 +69,7 @@ export function CollectiveCatalog({ offers }: { offers: Offer[] }) {
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-md">
+      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
           <div className="flex items-center gap-3">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -87,13 +87,24 @@ export function CollectiveCatalog({ offers }: { offers: Offer[] }) {
             Talk to Goflow
           </button>
         </div>
+        <div
+          className="absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-primary via-sky to-amber"
+          aria-hidden
+        />
       </header>
 
       {/* Hero */}
-      <section className="mx-auto max-w-6xl px-6 pb-6 pt-14">
-        <h1 className="text-4xl font-extrabold tracking-tight text-balance sm:text-[2.75rem]">
-          The Goflow Partner Collective
-        </h1>
+      <section className="relative overflow-hidden">
+        <div className="brand-mesh pointer-events-none absolute inset-0" aria-hidden />
+        <div className="relative mx-auto max-w-6xl px-6 pb-7 pt-16">
+          <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-border bg-card/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-primary backdrop-blur">
+            <span className="size-1.5 rounded-full bg-primary" />
+            Retail &amp; marketplace programs
+          </p>
+          <h1 className="max-w-[18ch] text-4xl font-extrabold leading-[1.04] tracking-tight text-balance sm:text-[3rem]">
+            The Goflow Partner <span className="text-primary">Collective</span>
+          </h1>
+        </div>
       </section>
 
       {/* Filters */}
@@ -110,7 +121,7 @@ export function CollectiveCatalog({ offers }: { offers: Offer[] }) {
                 className={cn(
                   "rounded-full border px-4 py-2 text-sm font-semibold transition-colors",
                   isActive
-                    ? "border-foreground bg-foreground text-background"
+                    ? "border-primary bg-primary text-primary-foreground shadow-sm shadow-primary/30"
                     : "border-border bg-card text-muted-foreground hover:border-foreground/40 hover:text-foreground",
                 )}
               >
@@ -127,8 +138,13 @@ export function CollectiveCatalog({ offers }: { offers: Offer[] }) {
       {/* Grid */}
       <main className="mx-auto max-w-6xl px-6 pb-20 pt-8">
         <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-4">
-          {visible.map((offer) => (
-            <OfferCard key={offer.id} offer={offer} onOpen={() => open(offer)} />
+          {visible.map((offer, i) => (
+            <OfferCard
+              key={offer.id}
+              offer={offer}
+              index={i}
+              onOpen={() => open(offer)}
+            />
           ))}
         </div>
       </main>
@@ -148,12 +164,26 @@ export function CollectiveCatalog({ offers }: { offers: Offer[] }) {
   );
 }
 
-function OfferCard({ offer, onOpen }: { offer: Offer; onOpen: () => void }) {
+function OfferCard({
+  offer,
+  index,
+  onOpen,
+}: {
+  offer: Offer;
+  index: number;
+  onOpen: () => void;
+}) {
   return (
     <button
       type="button"
       onClick={onOpen}
-      className="group relative flex flex-col gap-4 overflow-hidden rounded-2xl border border-border bg-card p-6 text-left shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+      style={
+        {
+          "--brand": offer.brand,
+          animationDelay: `${index * 35}ms`,
+        } as React.CSSProperties
+      }
+      className="offer-card card-in group relative flex flex-col gap-4 overflow-hidden rounded-2xl border border-border bg-card p-6 text-left shadow-sm hover:-translate-y-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
     >
       <span
         className="absolute inset-x-0 top-0 h-[3px]"

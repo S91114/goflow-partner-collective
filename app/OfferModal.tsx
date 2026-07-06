@@ -43,8 +43,13 @@ export function OfferModal({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative flex min-h-full w-full max-w-5xl flex-col overflow-hidden bg-background shadow-2xl sm:min-h-0 sm:max-h-[90vh] sm:rounded-3xl md:grid md:grid-cols-2"
+        className="modal-in relative flex min-h-full w-full max-w-5xl flex-col overflow-hidden bg-background shadow-2xl sm:min-h-0 sm:max-h-[90vh] sm:rounded-3xl md:grid md:grid-cols-2"
       >
+        <div
+          className="absolute inset-x-0 top-0 z-10 h-1"
+          style={{ backgroundColor: offer.brand }}
+          aria-hidden
+        />
         <button
           type="button"
           onClick={onClose}
@@ -55,7 +60,12 @@ export function OfferModal({
         </button>
 
         {/* Left: offer detail */}
-        <div className="flex flex-col gap-6 overflow-y-auto p-7 sm:p-9">
+        <div
+          className="flex flex-col gap-6 overflow-y-auto p-7 sm:p-9"
+          style={{
+            background: `linear-gradient(180deg, color-mix(in srgb, ${offer.brand} 8%, transparent), transparent 220px)`,
+          }}
+        >
           <div>
             <BrandLogo offer={offer} size={68} />
             <span className="mt-4 inline-block w-fit rounded-md border border-border px-2 py-1 text-[10.5px] font-semibold uppercase tracking-wider text-muted-foreground">

@@ -2,30 +2,35 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Goflow Partner Collective — design tokens (light theme).
+/* Goflow Partner Collective — brand tokens (from Goflow Brand Guidelines).
+   Indigo #5A6CFB · Navy #22354C · Sky #22A7F6 · Amber #FF9B00.
    All colors are HSL so Tailwind's hsl(var(--x)) mapping works. */
 @layer base {
   :root {
     /* Cool off-white, biased toward the Goflow indigo */
     --background: 222 32% 97.5%;
     /* Goflow navy ink (#22354C) */
-    --foreground: 214 38% 19%;
+    --foreground: 213 38% 22%;
 
     --card: 0 0% 100%;
-    --card-foreground: 214 38% 19%;
+    --card-foreground: 213 38% 22%;
 
     --muted: 220 32% 95%;
-    --muted-foreground: 215 18% 45%;
+    --muted-foreground: 214 19% 44%;
 
-    /* Goflow indigo (#536DFE) */
-    --primary: 231 99% 66%;
+    /* Goflow indigo (#5A6CFB) */
+    --primary: 233 95% 67%;
     --primary-foreground: 0 0% 100%;
+
+    /* Secondary brand accents */
+    --sky: 202 92% 55%; /* #22A7F6 */
+    --amber: 36 100% 50%; /* #FF9B00 */
 
     --success: 150 72% 38%;
 
     --border: 216 28% 89%;
     --input: 216 28% 86%;
-    --ring: 231 99% 66%;
+    --ring: 233 95% 67%;
 
     --radius: 0.875rem;
   }
@@ -37,8 +42,82 @@
   body {
     background: hsl(var(--background));
     color: hsl(var(--foreground));
-    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
-      Helvetica, Arial, sans-serif;
+    font-family: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
+      "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+}
+
+@layer components {
+  /* Soft indigo→sky brand mesh behind the hero — the one bold moment. */
+  .brand-mesh {
+    background:
+      radial-gradient(
+        62% 80% at 8% -20%,
+        hsl(var(--primary) / 0.18),
+        transparent 60%
+      ),
+      radial-gradient(
+        48% 70% at 96% -10%,
+        hsl(var(--sky) / 0.16),
+        transparent 55%
+      ),
+      radial-gradient(
+        40% 60% at 60% -30%,
+        hsl(var(--amber) / 0.07),
+        transparent 60%
+      );
+  }
+
+  /* Per-store brand glow on card hover (brand color set inline via --brand). */
+  .offer-card {
+    transition:
+      transform 0.2s cubic-bezier(0.2, 0.7, 0.3, 1),
+      box-shadow 0.2s,
+      border-color 0.2s;
+  }
+  .offer-card:hover {
+    box-shadow:
+      0 20px 44px -20px color-mix(in srgb, var(--brand, #5a6cfb) 45%, transparent),
+      0 2px 6px rgba(15, 23, 42, 0.05);
+  }
+
+  .card-in {
+    animation: cardIn 0.45s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  }
+  @keyframes cardIn {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .modal-in {
+    animation: modalIn 0.28s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  }
+  @keyframes modalIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px) scale(0.985);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-in,
+  .modal-in {
+    animation: none;
+  }
+  .offer-card {
+    transition: none;
   }
 }
