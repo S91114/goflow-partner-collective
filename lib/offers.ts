@@ -43,6 +43,10 @@ export type Offer = {
   cta?: string;
   /** External URL. When set, the modal shows a join button instead of a form. */
   link?: string;
+  /** Informational site shown as a "Visit site" link. */
+  website?: string;
+  /** Application. When embed=true the form renders in an iframe; else a link-out button. */
+  apply?: { url: string; embed?: boolean; label?: string };
 };
 
 export const FILTERS = [
@@ -65,6 +69,7 @@ const WHATSAPP_INVITE_URL = "https://chat.whatsapp.com/";
 export const OFFERS: Offer[] = [
   {
     id: "amazon-mcf",
+    website: "https://sell.amazon.com/fulfillment-by-amazon/fba-multichannel",
     name: "Amazon MCF",
     fullName: "Amazon Multi-Channel Fulfillment — Preferred Pricing",
     logo: "/logos/amazon.ico",
@@ -93,6 +98,7 @@ export const OFFERS: Offer[] = [
   },
   {
     id: "amazon-nsi",
+    website: "https://sell.amazon.com/grow",
     name: "Amazon NSI",
     fullName: "Amazon New Seller Incentives",
     logo: "/logos/amazon.ico",
@@ -120,6 +126,10 @@ export const OFFERS: Offer[] = [
   },
   {
     id: "walmart-nss",
+    apply: {
+      url: "https://marketplace.walmart.com/nss-cp/?utm_source=goflow&utm_medium=channelpartner&utm_campaign=40235183-fy27-us-mp-cp-gfl-nss-nss",
+      label: "Apply — up to $75K in savings",
+    },
     name: "Walmart NSS",
     fullName: "Walmart New Seller Savings",
     logo: "/logos/walmart.ico",
@@ -154,6 +164,8 @@ export const OFFERS: Offer[] = [
   },
   {
     id: "walmart-fav",
+    website:
+      "https://marketplacelearn.walmart.com/guides/Success-Hub:-Add-trending-items",
     name: "Walmart Customer Favorites",
     fullName: "Walmart Customer Favorites",
     logo: "/logos/walmart.ico",
@@ -182,6 +194,11 @@ export const OFFERS: Offer[] = [
   },
   {
     id: "target-plus",
+    website: "https://plus.target.com",
+    apply: {
+      url: "https://share.hsforms.com/11LMJrXewTFalUIwYloJSyQ4cwyj?partnerstack_click_id=wtmot3duBzMR6R&partnerstack_partner_key=bd1a1be36776",
+      embed: true,
+    },
     name: "Target Plus",
     fullName: "Target Plus",
     logo: "/logos/target.ico",
@@ -209,6 +226,7 @@ export const OFFERS: Offer[] = [
   },
   {
     id: "lowes",
+    website: "https://www.lowes.com/l/about/lowes-marketplace",
     name: "Lowe's Marketplace",
     fullName: "Lowe's Marketplace",
     wordmark: "Lowe's",
@@ -228,6 +246,11 @@ export const OFFERS: Offer[] = [
   },
   {
     id: "macys",
+    website: "https://marketplace.macys.com",
+    apply: {
+      url: "https://share.hsforms.com/1UQ5If8SlQlOnZDFuVfcEAA4cwyj",
+      embed: true,
+    },
     name: "Macy's Marketplace",
     fullName: "Macy's Marketplace",
     logo: "/logos/macys.ico",
@@ -247,6 +270,11 @@ export const OFFERS: Offer[] = [
   },
   {
     id: "nordstrom",
+    website: "https://www.nordstrom.com",
+    apply: {
+      url: "https://share.hsforms.com/1UQ5If8SlQlOnZDFuVfcEAA4cwyj",
+      embed: true,
+    },
     name: "Nordstrom Marketplace",
     fullName: "Nordstrom Marketplace",
     wordmark: "Nordstrom",
@@ -283,6 +311,7 @@ export const OFFERS: Offer[] = [
   },
   {
     id: "aliexpress",
+    website: "https://sell.aliexpress.com",
     name: "AliExpress",
     fullName: "AliExpress Marketplace",
     logo: "/logos/aliexpress.ico",
@@ -302,6 +331,7 @@ export const OFFERS: Offer[] = [
   },
   {
     id: "shein",
+    website: "https://marketplace.shein.com",
     name: "SHEIN",
     fullName: "SHEIN Marketplace",
     logo: "/logos/shein.ico",
@@ -318,6 +348,7 @@ export const OFFERS: Offer[] = [
   },
   {
     id: "temu",
+    website: "https://seller.temu.com",
     name: "Temu",
     fullName: "Temu Marketplace",
     logo: "/logos/temu.ico",
@@ -334,6 +365,7 @@ export const OFFERS: Offer[] = [
   },
   {
     id: "nocnoc",
+    website: "https://nocnocstore.com",
     name: "NocNoc",
     fullName: "NocNoc — Latin America",
     wordmark: "NocNoc",
@@ -353,6 +385,7 @@ export const OFFERS: Offer[] = [
   },
   {
     id: "retail-expansion",
+    website: "https://www.ecomdiversify.com",
     name: "Retail Expansion",
     fullName: "Retail Expansion Network",
     wordmark: "Retail",

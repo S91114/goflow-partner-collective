@@ -36,13 +36,15 @@ export function OfferModal({
       ? "Send to Goflow"
       : `Request intro to ${offer.name}`);
 
-  const panelTitle = offer.link
-    ? "Join the group"
-    : offer.id === "general"
-      ? "Get in touch"
-      : offer.cta
-        ? "Request an invite"
-        : "Request a warm intro";
+  const panelTitle = offer.apply
+    ? "Apply now"
+    : offer.link
+      ? "Join the group"
+      : offer.id === "general"
+        ? "Get in touch"
+        : offer.cta
+          ? "Request an invite"
+          : "Request a warm intro";
 
   return (
     <div
@@ -88,6 +90,16 @@ export function OfferModal({
             <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground">
               {offer.description}
             </p>
+            {offer.website && (
+              <a
+                href={offer.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 inline-flex w-fit items-center gap-1 text-[13px] font-semibold text-primary hover:underline"
+              >
+                Visit site <ArrowUpRight className="size-3.5" />
+              </a>
+            )}
           </div>
 
           {offer.whoItsFor && (
@@ -140,9 +152,47 @@ export function OfferModal({
           )}
         </div>
 
-        {/* Right: action — link-out join button or interest form */}
-        <div className="flex flex-col gap-1 border-t border-border bg-muted/30 p-7 sm:p-9 md:border-l md:border-t-0">
-          {offer.link ? (
+        {/* Right: apply (embedded form / link-out), join link, or interest form */}
+        <div className="flex flex-col border-t border-border bg-muted/30 p-7 sm:p-9 md:border-l md:border-t-0">
+          {offer.apply?.embed ? (
+            <div className="flex h-full min-h-[520px] flex-col">
+              <h3 className="text-lg font-bold tracking-tight">{panelTitle}</h3>
+              <p className="mb-3 mt-0.5 text-[13px] text-muted-foreground">
+                Complete the short application — it goes straight to the Goflow
+                team.
+              </p>
+              <iframe
+                src={offer.apply.url}
+                title={`${offer.name} application`}
+                loading="lazy"
+                className="min-h-[520px] w-full flex-1 rounded-xl border border-border bg-white"
+              />
+              <a
+                href={offer.apply.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+              >
+                Open the form in a new tab <ArrowUpRight className="size-3" />
+              </a>
+            </div>
+          ) : offer.apply ? (
+            <div className="flex h-full flex-col justify-center">
+              <h3 className="text-lg font-bold tracking-tight">{panelTitle}</h3>
+              <p className="mb-5 mt-1 text-[13px] text-muted-foreground">
+                You&apos;ll continue to the official application in a new tab.
+              </p>
+              <a
+                href={offer.apply.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-sm font-bold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
+              >
+                {offer.apply.label ?? "Apply now"}
+                <ArrowUpRight className="size-4" />
+              </a>
+            </div>
+          ) : offer.link ? (
             <div className="flex h-full flex-col justify-center">
               <h3 className="text-lg font-bold tracking-tight">{panelTitle}</h3>
               <p className="mb-5 mt-1 text-[13px] text-muted-foreground">
