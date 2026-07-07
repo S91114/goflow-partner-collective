@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, type ReactNode } from "react";
-import { Check, X } from "lucide-react";
+import { ArrowUpRight, Check, X } from "lucide-react";
 import type { Offer } from "@/lib/offers";
 import { BrandLogo } from "./BrandLogo";
 import { InterestForm } from "./InterestForm";
@@ -31,7 +31,18 @@ export function OfferModal({
   if (!offer) return null;
 
   const submitLabel =
-    offer.id === "general" ? "Send to Goflow" : `Request intro to ${offer.name}`;
+    offer.cta ??
+    (offer.id === "general"
+      ? "Send to Goflow"
+      : `Request intro to ${offer.name}`);
+
+  const panelTitle = offer.link
+    ? "Join the group"
+    : offer.id === "general"
+      ? "Get in touch"
+      : offer.cta
+        ? "Request an invite"
+        : "Request a warm intro";
 
   return (
     <div
@@ -129,20 +140,39 @@ export function OfferModal({
           )}
         </div>
 
-        {/* Right: interest form */}
+        {/* Right: action — link-out join button or interest form */}
         <div className="flex flex-col gap-1 border-t border-border bg-muted/30 p-7 sm:p-9 md:border-l md:border-t-0">
-          <h3 className="text-lg font-bold tracking-tight">
-            {offer.id === "general" ? "Get in touch" : "Request a warm intro"}
-          </h3>
-          <p className="mb-2 text-[13px] text-muted-foreground">
-            Tell us about your brand — this goes straight to the Goflow team.
-          </p>
-          <InterestForm
-            offerId={offer.id}
-            offerName={offer.fullName}
-            fields={offer.collect}
-            submitLabel={submitLabel}
-          />
+          {offer.link ? (
+            <div className="flex h-full flex-col justify-center">
+              <h3 className="text-lg font-bold tracking-tight">{panelTitle}</h3>
+              <p className="mb-5 mt-1 text-[13px] text-muted-foreground">
+                Free to join — you&apos;ll open WhatsApp to accept the invite.
+              </p>
+              <a
+                href={offer.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-bold text-white shadow-sm transition-opacity hover:opacity-90"
+                style={{ backgroundColor: offer.brand }}
+              >
+                {submitLabel}
+                <ArrowUpRight className="size-4" />
+              </a>
+            </div>
+          ) : (
+            <>
+              <h3 className="text-lg font-bold tracking-tight">{panelTitle}</h3>
+              <p className="mb-2 text-[13px] text-muted-foreground">
+                Tell us about your brand — this goes straight to the Goflow team.
+              </p>
+              <InterestForm
+                offerId={offer.id}
+                offerName={offer.fullName}
+                fields={offer.collect}
+                submitLabel={submitLabel}
+              />
+            </>
+          )}
         </div>
       </div>
     </div>

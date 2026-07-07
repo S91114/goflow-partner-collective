@@ -1,8 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { FILTERS, filterOffers, findOffer, type Offer } from "@/lib/offers";
-import { cn } from "@/lib/utils";
+import { useCallback, useEffect, useState } from "react";
+import { findOffer, type Offer } from "@/lib/offers";
 import { BrandLogo } from "./BrandLogo";
 import { OfferModal } from "./OfferModal";
 
@@ -31,19 +30,7 @@ function resolve(id: string | null): Offer | null {
 }
 
 export function CollectiveCatalog({ offers }: { offers: Offer[] }) {
-  const [active, setActive] = useState<string>("All");
   const [selected, setSelected] = useState<Offer | null>(null);
-
-  const visible = useMemo(() => filterOffers(offers, active), [offers, active]);
-
-  const counts = useMemo(() => {
-    const map: Record<string, number> = { All: offers.length };
-    for (const f of FILTERS) {
-      if (f === "All") continue;
-      map[f] = offers.filter((o) => o.filters.includes(f)).length;
-    }
-    return map;
-  }, [offers]);
 
   // Open from ?offer= on first load (shareable links).
   useEffect(() => {
@@ -107,38 +94,10 @@ export function CollectiveCatalog({ offers }: { offers: Offer[] }) {
         </div>
       </section>
 
-      {/* Filters */}
-      <div className="sticky top-16 z-30 border-b border-border bg-background/90 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl flex-wrap gap-2 px-6 py-3.5">
-          {FILTERS.map((f) => {
-            const isActive = active === f;
-            return (
-              <button
-                key={f}
-                type="button"
-                aria-pressed={isActive}
-                onClick={() => setActive(f)}
-                className={cn(
-                  "rounded-full border px-4 py-2 text-sm font-semibold transition-colors",
-                  isActive
-                    ? "border-primary bg-primary text-primary-foreground shadow-sm shadow-primary/30"
-                    : "border-border bg-card text-muted-foreground hover:border-foreground/40 hover:text-foreground",
-                )}
-              >
-                {f}
-                <span className="ml-1.5 text-xs tabular-nums opacity-60">
-                  {counts[f]}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
       {/* Grid */}
-      <main className="mx-auto max-w-6xl px-6 pb-20 pt-8">
+      <main className="mx-auto max-w-6xl px-6 pb-20 pt-4">
         <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-4">
-          {visible.map((offer, i) => (
+          {offers.map((offer, i) => (
             <OfferCard
               key={offer.id}
               offer={offer}

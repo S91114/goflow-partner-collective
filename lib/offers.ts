@@ -39,6 +39,10 @@ export type Offer = {
   process: string[];
   /** Offer-specific intake questions, added on top of the base fields. */
   collect: CollectField[];
+  /** Custom action-button label (defaults to "Request intro to {name}"). */
+  cta?: string;
+  /** External URL. When set, the modal shows a join button instead of a form. */
+  link?: string;
 };
 
 export const FILTERS = [
@@ -47,6 +51,7 @@ export const FILTERS = [
   "Big-Box Retail",
   "International",
   "Fashion & Beauty",
+  "Community",
 ] as const;
 
 const CATEGORY_FIELD = (options?: string[]): CollectField =>
@@ -54,7 +59,56 @@ const CATEGORY_FIELD = (options?: string[]): CollectField =>
     ? { name: "category", label: "Primary category", type: "select", options }
     : { name: "category", label: "Primary category", type: "text" };
 
+// TODO: replace with the real WhatsApp group invite link when available.
+const WHATSAPP_INVITE_URL = "https://chat.whatsapp.com/";
+
 export const OFFERS: Offer[] = [
+  {
+    id: "partner-dinners",
+    name: "Partner Dinners",
+    fullName: "Exclusive Partner Dinners",
+    wordmark: "Dinners",
+    brand: "#FF9B00",
+    type: "Events",
+    filters: ["Community"],
+    tags: ["Invite-only", "Networking", "Monthly"],
+    description:
+      "Monthly, invite-only dinners we host with a partner — an intimate table of top ecommerce executives for great food and candid, off-the-record conversation.",
+    whoItsFor: "Founders and senior leaders at established ecommerce brands",
+    requirements: [],
+    process: [
+      "Tell us your city and a bit about your brand.",
+      "We confirm fit and send an invite to the next dinner near you.",
+    ],
+    collect: [
+      {
+        name: "location",
+        label: "Preferred location",
+        type: "select",
+        options: ["NYC", "MIA", "NJ"],
+        required: true,
+      },
+    ],
+    cta: "Request an invite",
+  },
+  {
+    id: "whatsapp-community",
+    name: "WhatsApp Group",
+    fullName: "Join the Partner WhatsApp Group",
+    logo: "/logos/whatsapp.svg",
+    brand: "#25D366",
+    type: "Community",
+    filters: ["Community"],
+    tags: ["Community", "Real-time", "Free"],
+    description:
+      "Join the Goflow partner WhatsApp group to swap notes with other ecommerce brands, get channel and deal alerts, and reach the Goflow team directly.",
+    whoItsFor: "",
+    requirements: [],
+    process: [],
+    collect: [],
+    link: WHATSAPP_INVITE_URL,
+    cta: "Join the WhatsApp group",
+  },
   {
     id: "amazon-mcf",
     name: "Amazon MCF",
