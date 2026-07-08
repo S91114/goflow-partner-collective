@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { ArrowRight, CheckCircle2, Sparkles } from "lucide-react";
-import { RegistrationForm } from "./RegistrationForm";
 
 const channels = [
   "Amazon",
@@ -14,7 +13,7 @@ const channels = [
 const proof = [
   "Curated channel programs",
   "Warm Goflow intros",
-  "Application tracking",
+  "Goflow-owned application capture",
   "Partner community access",
 ];
 
@@ -41,8 +40,8 @@ export default function Home() {
           </Link>
         </header>
 
-        <div className="relative mx-auto grid max-w-6xl gap-10 px-6 pb-16 pt-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-start lg:pb-20 lg:pt-14">
-          <div className="max-w-2xl">
+        <div className="relative mx-auto max-w-6xl px-6 pb-16 pt-8 lg:pb-20 lg:pt-14">
+          <div className="max-w-4xl">
             <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-border bg-card/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-primary backdrop-blur">
               <Sparkles className="size-3.5" />
               Retail and marketplace access
@@ -50,11 +49,23 @@ export default function Home() {
             <h1 className="text-4xl font-extrabold leading-[1.02] tracking-tight text-balance sm:text-6xl">
               Get matched to the marketplace programs Goflow can open for you.
             </h1>
-            <p className="mt-5 max-w-xl text-lg leading-8 text-muted-foreground">
-              Apply once and explore the Partner Collective: a curated catalog of
-              retail, marketplace, international, and community programs built
-              for ecommerce brands ready to expand.
+            <p className="mt-5 max-w-2xl text-lg leading-8 text-muted-foreground">
+              Explore the Partner Collective: a curated catalog of retail,
+              marketplace, international, and community programs built for
+              ecommerce brands ready to expand.
             </p>
+
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              <Link
+                href="/collective"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/20 transition-colors hover:bg-primary/90"
+              >
+                View catalog <ArrowRight className="size-4" />
+              </Link>
+              <span className="text-sm font-semibold text-muted-foreground">
+                Browse instantly
+              </span>
+            </div>
 
             <div className="mt-8 grid gap-3 sm:grid-cols-2">
               {proof.map((item) => (
@@ -76,22 +87,6 @@ export default function Home() {
               ))}
             </div>
           </div>
-
-          <div id="apply" className="rounded-2xl border border-border bg-card p-5 shadow-xl shadow-primary/10 sm:p-7">
-            <div className="mb-5">
-              <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">
-                Apply to join
-              </p>
-              <h2 className="mt-2 text-2xl font-extrabold tracking-tight">
-                Request access
-              </h2>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                Tell us about your brand. We&apos;ll save your profile and use it
-                to route future program applications.
-              </p>
-            </div>
-            <RegistrationForm />
-          </div>
         </div>
       </section>
 
@@ -99,8 +94,8 @@ export default function Home() {
         <div className="mx-auto grid max-w-6xl gap-6 px-6 py-12 md:grid-cols-3">
           {[
             ["Discover", "Filter programs by channel, category, geography, and seller stage."],
-            ["Apply", "Submit Goflow-owned applications before any partner handoff."],
-            ["Track", "Every registration, request, and outbound click lands in Supabase."],
+            ["Connect", "Submit Goflow-owned program requests before any partner handoff."],
+            ["Track", "Every request and outbound click lands in Supabase."],
           ].map(([title, body]) => (
             <div key={title}>
               <h3 className="text-base font-extrabold">{title}</h3>
