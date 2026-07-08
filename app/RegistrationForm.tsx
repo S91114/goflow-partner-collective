@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
-import { Check, Loader2, Send } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, Check, Loader2, Send } from "lucide-react";
 
 const inputCls =
   "w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-[3px] focus:ring-primary/20";
@@ -68,7 +69,7 @@ export function RegistrationForm() {
       });
       const json = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setError(json.error || "We couldn't send your access link yet.");
+        setError(json.error || "We couldn't save your profile yet.");
         return;
       }
       setDone(payload.email.trim().toLowerCase());
@@ -85,11 +86,17 @@ export function RegistrationForm() {
         <div className="mx-auto grid size-12 place-items-center rounded-full bg-success/10 text-success">
           <Check className="size-6" />
         </div>
-        <h3 className="mt-4 text-xl font-extrabold">Check your email</h3>
+        <h3 className="mt-4 text-xl font-extrabold">You're on the list</h3>
         <p className="mt-2 text-sm leading-6 text-muted-foreground">
-          We sent a secure access link to <b>{done}</b>. Open it to enter the
-          Partner Collective.
+          We saved your profile for <b>{done}</b>. You can browse the Partner
+          Collective while we finish the email login setup.
         </p>
+        <Link
+          href="/collective"
+          className="mt-5 inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary/90"
+        >
+          Browse the catalog <ArrowRight className="size-4" />
+        </Link>
       </div>
     );
   }
@@ -146,7 +153,7 @@ export function RegistrationForm() {
       >
         {submitting ? (
           <>
-            <Loader2 className="size-4 animate-spin" /> Sending access link
+            <Loader2 className="size-4 animate-spin" /> Saving profile
           </>
         ) : (
           <>

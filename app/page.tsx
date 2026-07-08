@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, LockKeyhole, Sparkles } from "lucide-react";
+import { ArrowRight, CheckCircle2, Sparkles } from "lucide-react";
 import { RegistrationForm } from "./RegistrationForm";
 
 const channels = [
@@ -33,11 +33,11 @@ export default function Home() {
             </span>
           </div>
           <Link
-            href="/login"
+            href="/collective"
             className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground shadow-sm transition-colors hover:bg-muted"
           >
-            Member login
-            <LockKeyhole className="size-4" />
+            View catalog
+            <ArrowRight className="size-4" />
           </Link>
         </header>
 
@@ -51,7 +51,7 @@ export default function Home() {
               Get matched to the marketplace programs Goflow can open for you.
             </h1>
             <p className="mt-5 max-w-xl text-lg leading-8 text-muted-foreground">
-              Apply once to access the Partner Collective: a gated catalog of
+              Apply once and explore the Partner Collective: a curated catalog of
               retail, marketplace, international, and community programs built
               for ecommerce brands ready to expand.
             </p>
@@ -86,8 +86,8 @@ export default function Home() {
                 Request access
               </h2>
               <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                Tell us about your brand. We&apos;ll email a secure login link
-                and use this profile to route future program applications.
+                Tell us about your brand. We&apos;ll save your profile and use it
+                to route future program applications.
               </p>
             </div>
             <RegistrationForm />
@@ -113,7 +113,7 @@ export default function Home() {
       <footer className="mx-auto flex max-w-6xl flex-col justify-between gap-3 px-6 py-8 text-xs text-muted-foreground sm:flex-row sm:items-center">
         <span>Goflow Partner Collective</span>
         <Link href="/collective" className="inline-flex items-center gap-1 font-semibold text-primary">
-          Already approved? Enter the catalog <ArrowRight className="size-3.5" />
+          Enter the catalog <ArrowRight className="size-3.5" />
         </Link>
       </footer>
     </main>

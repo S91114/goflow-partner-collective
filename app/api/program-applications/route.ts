@@ -1,8 +1,8 @@
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { OFFERS, findOffer } from "@/lib/offers";
 import { notifyByEmail } from "@/lib/notifications";
 import { createAdminClient, hasAdminKey } from "@/lib/supabase/admin";
-import { createClient } from "@/lib/supabase/server";
 import {
   cleanDetails,
   cleanEmail,
@@ -22,14 +22,6 @@ export async function POST(request: Request) {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
-  }
-
-  const supabase = await createClient();
-  const { data } = await supabase.auth.getClaims();
-  const userId = data?.claims?.sub as string | undefined;
-
-  if (!userId) {
-    return NextResponse.json({ error: "Please log in first." }, { status: 401 });
   }
 
   const offerId = cleanString(body.offerId, 80);
@@ -63,8 +55,21 @@ export async function POST(request: Request) {
     );
   }
 
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  if (!url || !key) {
+    return NextResponse.json(
+      { error: "The application form is not connected yet." },
+      { status: 503 },
+    );
+  }
+
   try {
-    const writeClient = hasAdminKey() ? createAdminClient() : supabase;
+    const writeClient = hasAdminKey()
+      ? createAdminClient()
+      : createSupabaseClient(url, key, {
+          auth: { persistSession: false, autoRefreshToken: false },
+        });
     const offerName =
       offerId === "general" ? "Talk to Goflow" : offer?.fullName ?? offerId;
     const outboundUrl =
@@ -74,11 +79,11 @@ export async function POST(request: Request) {
       email,
       company,
       website,
-      user_id: userId,
+      user_id: null,
     };
 
     const { error } = await writeClient.from("program_applications").insert({
-      user_id: userId,
+      user_id: null,
       offer_id: offerId,
       offer_name: offerName,
       request_type: requestType,
@@ -101,7 +106,7 @@ export async function POST(request: Request) {
     }
 
     await writeClient.from("program_events").insert({
-      user_id: userId,
+      user_id: null,
       offer_id: offerId,
       offer_name: offerName,
       event_type: `${requestType}_submitted`,

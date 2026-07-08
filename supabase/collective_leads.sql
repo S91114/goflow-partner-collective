@@ -151,8 +151,8 @@ revoke all on table public.profiles from anon, authenticated;
 
 grant insert on table public.registrations to anon, authenticated;
 grant select, insert, update on table public.profiles to authenticated;
-grant insert on table public.program_applications to authenticated;
-grant insert on table public.program_events to authenticated;
+grant insert on table public.program_applications to anon, authenticated;
+grant insert on table public.program_events to anon, authenticated;
 
 drop policy if exists "Anyone can request access" on public.registrations;
 create policy "Anyone can request access"
@@ -182,12 +182,16 @@ create policy "No client reads program applications"
   using (false);
 
 drop policy if exists "Users can submit their own program applications" on public.program_applications;
-create policy "Users can submit their own program applications"
+drop policy if exists "Anyone can submit program applications" on public.program_applications;
+create policy "Anyone can submit program applications"
   on public.program_applications
   for insert
-  to authenticated
+  to anon, authenticated
   with check (
-    (select auth.uid()) = user_id
+    (
+      ((select auth.uid()) is null and user_id is null)
+      or ((select auth.uid()) = user_id)
+    )
     and length(email) > 3
     and length(offer_id) > 0
     and length(offer_name) > 0
@@ -202,11 +206,18 @@ create policy "No client reads program events"
   using (false);
 
 drop policy if exists "Users can create their own program events" on public.program_events;
-create policy "Users can create their own program events"
+drop policy if exists "Anyone can create program events" on public.program_events;
+create policy "Anyone can create program events"
   on public.program_events
   for insert
-  to authenticated
-  with check ((select auth.uid()) = user_id and length(event_type) > 0);
+  to anon, authenticated
+  with check (
+    (
+      ((select auth.uid()) is null and user_id is null)
+      or ((select auth.uid()) = user_id)
+    )
+    and length(event_type) > 0
+  );
 
 drop policy if exists "Users can read their own profile" on public.profiles;
 create policy "Users can read their own profile"

@@ -1,7 +1,7 @@
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { findOffer } from "@/lib/offers";
 import { createAdminClient, hasAdminKey } from "@/lib/supabase/admin";
-import { createClient } from "@/lib/supabase/server";
 import { cleanDetails, cleanString, getAttribution } from "@/lib/validation";
 
 export const runtime = "nodejs";
@@ -31,14 +31,20 @@ export async function POST(request: Request) {
   const metadata = cleanDetails(body.metadata);
   const attribution = getAttribution(request, body as Record<string, unknown>);
 
-  const supabase = await createClient();
-  const { data } = await supabase.auth.getClaims();
-  const userId = data?.claims?.sub as string | undefined;
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  if (!url || !key) {
+    return NextResponse.json({ ok: true });
+  }
 
   try {
-    const writeClient = hasAdminKey() ? createAdminClient() : supabase;
+    const writeClient = hasAdminKey()
+      ? createAdminClient()
+      : createSupabaseClient(url, key, {
+          auth: { persistSession: false, autoRefreshToken: false },
+        });
     const { error } = await writeClient.from("program_events").insert({
-      user_id: userId ?? null,
+      user_id: null,
       offer_id: offerId,
       offer_name: offer?.fullName ?? null,
       event_type: eventType,

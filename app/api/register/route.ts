@@ -68,33 +68,13 @@ export async function POST(request: Request) {
       current_channels: currentChannels,
       notes,
       ...attribution,
-      status: "access_sent",
+      status: "registered",
     });
 
     if (error) {
       console.error("[collective] registration insert failed:", error.message);
       return NextResponse.json(
         { error: "We couldn't save your request. Please try again." },
-        { status: 500 },
-      );
-    }
-
-    const authClient = createSupabaseClient(url, key, {
-      auth: { persistSession: false, autoRefreshToken: false },
-    });
-    const origin = new URL(request.url).origin;
-    const { error: otpError } = await authClient.auth.signInWithOtp({
-      email,
-      options: {
-        shouldCreateUser: true,
-        emailRedirectTo: `${origin}/auth/callback?next=/collective`,
-      },
-    });
-
-    if (otpError) {
-      console.error("[collective] registration magic link failed:", otpError.message);
-      return NextResponse.json(
-        { error: "We saved your profile, but couldn't send the access link yet." },
         { status: 500 },
       );
     }
