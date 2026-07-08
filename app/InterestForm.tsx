@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type FormEvent, type ReactNode } from "react";
-import { Check, Loader2, Send } from "lucide-react";
+import { ArrowUpRight, Check, Loader2, Send } from "lucide-react";
 import type { CollectField } from "@/lib/offers";
 
 const inputCls =
@@ -12,11 +12,17 @@ export function InterestForm({
   offerName,
   fields,
   submitLabel,
+  requestType,
+  outboundUrl,
+  outboundLabel,
 }: {
   offerId: string;
   offerName: string;
   fields: CollectField[];
   submitLabel: string;
+  requestType: string;
+  outboundUrl?: string | null;
+  outboundLabel?: string;
 }) {
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState<string | null>(null);
@@ -45,10 +51,17 @@ export function InterestForm({
 
     setSubmitting(true);
     try {
-      const res = await fetch("/api/leads", {
+      const res = await fetch("/api/program-applications", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          ...payload,
+          requestType,
+          attribution: {
+            landing_path: `${window.location.pathname}${window.location.search}`,
+            referrer: document.referrer,
+          },
+        }),
       });
       const json = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -64,6 +77,23 @@ export function InterestForm({
   }
 
   if (done) {
+    const eventType = requestType === "join" ? "join_click" : "partner_apply_click";
+    const onContinue = () => {
+      fetch("/api/events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          eventType,
+          offerId,
+          metadata: { outboundUrl: outboundUrl ?? "" },
+          attribution: {
+            landing_path: `${window.location.pathname}${window.location.search}`,
+            referrer: document.referrer,
+          },
+        }),
+      }).catch(() => {});
+    };
+
     return (
       <div className="flex h-full flex-col items-center justify-center rounded-2xl border border-border bg-muted/50 p-8 text-center">
         <div className="grid size-14 place-items-center rounded-full bg-success/10 text-success">
@@ -76,6 +106,18 @@ export function InterestForm({
           Thanks, {done}. Your interest in <b>{offerName}</b> just landed with
           the Goflow team, who&apos;ll reach out to kick off the intro.
         </p>
+        {outboundUrl && (
+          <a
+            href={outboundUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={onContinue}
+            className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary/90"
+          >
+            {outboundLabel ?? "Continue"}
+            <ArrowUpRight className="size-4" />
+          </a>
+        )}
       </div>
     );
   }

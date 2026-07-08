@@ -1,7 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { findOffer, type Offer } from "@/lib/offers";
+import Link from "next/link";
+import { Search } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { FILTERS, findOffer, filterOffers, type Offer } from "@/lib/offers";
 import { BrandLogo } from "./BrandLogo";
 import { OfferModal } from "./OfferModal";
 
@@ -31,6 +33,8 @@ function resolve(id: string | null): Offer | null {
 
 export function CollectiveCatalog({ offers }: { offers: Offer[] }) {
   const [selected, setSelected] = useState<Offer | null>(null);
+  const [activeFilter, setActiveFilter] = useState<(typeof FILTERS)[number]>("All");
+  const [query, setQuery] = useState("");
 
   // Open from ?offer= on first load (shareable links).
   useEffect(() => {
@@ -39,12 +43,32 @@ export function CollectiveCatalog({ offers }: { offers: Offer[] }) {
     if (match) setSelected(match);
   }, []);
 
+  const track = useCallback(
+    (eventType: string, metadata: Record<string, string> = {}, offer?: Offer) => {
+      fetch("/api/events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          eventType,
+          offerId: offer?.id,
+          metadata,
+          attribution: {
+            landing_path: `${window.location.pathname}${window.location.search}`,
+            referrer: document.referrer,
+          },
+        }),
+      }).catch(() => {});
+    },
+    [],
+  );
+
   const open = useCallback((offer: Offer) => {
     setSelected(offer);
     const url = new URL(window.location.href);
     url.searchParams.set("offer", offer.id);
     window.history.replaceState(null, "", url);
-  }, []);
+    track("offer_open", {}, offer);
+  }, [track]);
 
   const close = useCallback(() => {
     setSelected(null);
@@ -52,6 +76,38 @@ export function CollectiveCatalog({ offers }: { offers: Offer[] }) {
     url.searchParams.delete("offer");
     window.history.replaceState(null, "", url);
   }, []);
+
+  const visibleOffers = useMemo(() => {
+    const filtered = filterOffers(offers, activeFilter);
+    const q = query.trim().toLowerCase();
+    if (!q) return filtered;
+    return filtered.filter((offer) =>
+      [
+        offer.name,
+        offer.fullName,
+        offer.type,
+        offer.description,
+        offer.whoItsFor,
+        ...offer.tags,
+        ...offer.filters,
+      ]
+        .join(" ")
+        .toLowerCase()
+        .includes(q),
+    );
+  }, [activeFilter, offers, query]);
+
+  function updateFilter(filter: (typeof FILTERS)[number]) {
+    setActiveFilter(filter);
+    track("filter_used", { filter });
+  }
+
+  function updateQuery(value: string) {
+    setQuery(value);
+    if (value.trim().length >= 2) {
+      track("search_used", { query: value.trim().slice(0, 80) });
+    }
+  }
 
   return (
     <div className="min-h-screen">
@@ -96,8 +152,35 @@ export function CollectiveCatalog({ offers }: { offers: Offer[] }) {
 
       {/* Grid */}
       <main className="mx-auto max-w-6xl px-6 pb-20 pt-4">
+        <div className="mb-5 flex flex-col gap-3 rounded-2xl border border-border bg-card p-3 shadow-sm md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-wrap gap-2">
+            {FILTERS.map((filter) => (
+              <button
+                key={filter}
+                type="button"
+                onClick={() => updateFilter(filter)}
+                className={`rounded-lg px-3 py-2 text-xs font-bold transition-colors ${
+                  activeFilter === filter
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {filter}
+              </button>
+            ))}
+          </div>
+          <label className="relative min-w-0 md:w-72">
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <input
+              value={query}
+              onChange={(e) => updateQuery(e.target.value)}
+              placeholder="Search programs"
+              className="w-full rounded-lg border border-input bg-background py-2 pl-9 pr-3 text-sm outline-none transition focus:border-primary focus:ring-[3px] focus:ring-primary/20"
+            />
+          </label>
+        </div>
         <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-4">
-          {offers.map((offer, i) => (
+          {visibleOffers.map((offer, i) => (
             <OfferCard
               key={offer.id}
               offer={offer}
@@ -106,6 +189,14 @@ export function CollectiveCatalog({ offers }: { offers: Offer[] }) {
             />
           ))}
         </div>
+        {visibleOffers.length === 0 && (
+          <div className="rounded-2xl border border-border bg-card p-10 text-center">
+            <h2 className="text-xl font-extrabold">No matching programs yet</h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Try a broader search or ask Goflow to point you to the right partner.
+            </p>
+          </div>
+        )}
       </main>
 
       {/* Footer */}
@@ -114,7 +205,9 @@ export function CollectiveCatalog({ offers }: { offers: Offer[] }) {
           <span className="inline-flex w-fit items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 font-medium text-primary">
             Goflow Partner Collective
           </span>
-          <span>Powered by Goflow.</span>
+          <Link href="/" className="font-semibold text-primary">
+            Registration landing page
+          </Link>
         </div>
       </footer>
 

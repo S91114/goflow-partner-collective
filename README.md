@@ -1,9 +1,10 @@
 # Goflow Partner Collective
 
-A marketplace catalog of the retail & marketplace expansion programs Goflow can
-open for a brand. Browse the tiles, open one for details, and request a warm
-intro — the lead is saved to Supabase and (optionally) emailed to the Goflow
-team.
+A gated landing page and marketplace catalog of the retail & marketplace
+expansion programs Goflow can open for a brand. Visitors request access on the
+landing page, receive a Supabase magic link, and then browse/apply inside the
+Partner Collective catalog. Registrations, program requests, and click events
+are saved to Supabase and optionally emailed to the Goflow team.
 
 Built with **Next.js (App Router)**, **Tailwind CSS**, and **Supabase**.
 Designed to deploy on **Vercel**.
@@ -28,6 +29,7 @@ row-level-security policies (public can submit, only your team can read).
 | --- | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | ✅ | Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | ✅ | Supabase publishable (anon) key |
+| `SUPABASE_SECRET_KEY` | ✅ | Server-only key used by API routes to write gated data |
 | `COLLECTIVE_NOTIFY_EMAIL` | — | Where interest notifications go (default `sadya@goflow.com`) |
 | `RESEND_API_KEY` | — | Enables email notifications via [Resend](https://resend.com) |
 | `COLLECTIVE_NOTIFY_FROM` | — | From-address for notification emails |

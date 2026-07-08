@@ -29,6 +29,7 @@ export function OfferModal({
   }, [open, onClose]);
 
   if (!offer) return null;
+  const currentOffer = offer;
 
   const submitLabel =
     offer.cta ??
@@ -36,15 +37,44 @@ export function OfferModal({
       ? "Send to Goflow"
       : `Request intro to ${offer.name}`);
 
-  const panelTitle = offer.apply
-    ? "Apply now"
+  const requestType = offer.id === "general"
+    ? "general"
     : offer.link
-      ? "Join the group"
-      : offer.id === "general"
-        ? "Get in touch"
+      ? "join"
+      : offer.apply
+        ? "apply"
+        : "learn_more";
+  const panelTitle = offer.id === "general"
+    ? "Get in touch"
+    : offer.link
+      ? "Request community access"
+      : offer.apply
+        ? "Apply with Goflow"
         : offer.cta
           ? "Request an invite"
           : "Request a warm intro";
+  const outboundUrl = offer.apply?.url || offer.link || null;
+  const outboundLabel = offer.apply
+    ? offer.apply.label ?? "Continue to partner application"
+    : offer.link
+      ? offer.cta ?? "Continue to WhatsApp"
+      : undefined;
+
+  function trackVisitSite() {
+    fetch("/api/events", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        eventType: "visit_site_click",
+        offerId: currentOffer.id,
+        metadata: { website: currentOffer.website ?? "" },
+        attribution: {
+          landing_path: `${window.location.pathname}${window.location.search}`,
+          referrer: document.referrer,
+        },
+      }),
+    }).catch(() => {});
+  }
 
   return (
     <div
@@ -95,6 +125,7 @@ export function OfferModal({
                 href={offer.website}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={trackVisitSite}
                 className="mt-3 inline-flex w-fit items-center gap-1 text-[13px] font-semibold text-primary hover:underline"
               >
                 Visit site <ArrowUpRight className="size-3.5" />
@@ -152,77 +183,22 @@ export function OfferModal({
           )}
         </div>
 
-        {/* Right: apply (embedded form / link-out), join link, or interest form */}
+        {/* Right: Goflow-owned application / learn-more form */}
         <div className="flex flex-col border-t border-border bg-muted/30 p-7 sm:p-9 md:border-l md:border-t-0">
-          {offer.apply?.embed ? (
-            <div className="flex h-full min-h-[520px] flex-col">
-              <h3 className="text-lg font-bold tracking-tight">{panelTitle}</h3>
-              <p className="mb-3 mt-0.5 text-[13px] text-muted-foreground">
-                Complete the short application — it goes straight to the Goflow
-                team.
-              </p>
-              <iframe
-                src={offer.apply.url}
-                title={`${offer.name} application`}
-                loading="lazy"
-                className="min-h-[520px] w-full flex-1 rounded-xl border border-border bg-white"
-              />
-              <a
-                href={offer.apply.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
-              >
-                Open the form in a new tab <ArrowUpRight className="size-3" />
-              </a>
-            </div>
-          ) : offer.apply ? (
-            <div className="flex h-full flex-col justify-center">
-              <h3 className="text-lg font-bold tracking-tight">{panelTitle}</h3>
-              <p className="mb-5 mt-1 text-[13px] text-muted-foreground">
-                You&apos;ll continue to the official application in a new tab.
-              </p>
-              <a
-                href={offer.apply.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-sm font-bold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
-              >
-                {offer.apply.label ?? "Apply now"}
-                <ArrowUpRight className="size-4" />
-              </a>
-            </div>
-          ) : offer.link ? (
-            <div className="flex h-full flex-col justify-center">
-              <h3 className="text-lg font-bold tracking-tight">{panelTitle}</h3>
-              <p className="mb-5 mt-1 text-[13px] text-muted-foreground">
-                Free to join — you&apos;ll open WhatsApp to accept the invite.
-              </p>
-              <a
-                href={offer.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-bold text-white shadow-sm transition-opacity hover:opacity-90"
-                style={{ backgroundColor: offer.brand }}
-              >
-                {submitLabel}
-                <ArrowUpRight className="size-4" />
-              </a>
-            </div>
-          ) : (
-            <>
-              <h3 className="text-lg font-bold tracking-tight">{panelTitle}</h3>
-              <p className="mb-2 text-[13px] text-muted-foreground">
-                Tell us about your brand — this goes straight to the Goflow team.
-              </p>
-              <InterestForm
-                offerId={offer.id}
-                offerName={offer.fullName}
-                fields={offer.collect}
-                submitLabel={submitLabel}
-              />
-            </>
-          )}
+          <h3 className="text-lg font-bold tracking-tight">{panelTitle}</h3>
+          <p className="mb-2 text-[13px] text-muted-foreground">
+            Tell us about your brand first. Goflow captures the request, then
+            routes you to the right partner path when one is available.
+          </p>
+          <InterestForm
+            offerId={offer.id}
+            offerName={offer.fullName}
+            fields={offer.collect}
+            submitLabel={submitLabel}
+            requestType={requestType}
+            outboundUrl={outboundUrl}
+            outboundLabel={outboundLabel}
+          />
         </div>
       </div>
     </div>
