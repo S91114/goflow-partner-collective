@@ -1,6 +1,7 @@
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { createAdminClient, hasAdminKey } from "@/lib/supabase/admin";
+import { syncLead } from "@/lib/lead-sync";
 import { notifyByEmail } from "@/lib/notifications";
 import {
   cleanEmail,
@@ -93,6 +94,19 @@ export async function POST(request: Request) {
         Source: attribution.utm_source,
         Campaign: attribution.utm_campaign,
       },
+    });
+
+    await syncLead({
+      kind: "registration",
+      name,
+      email,
+      company,
+      website,
+      category,
+      gmvBand,
+      currentChannels,
+      notes,
+      attribution,
     });
 
     return NextResponse.json({ ok: true });

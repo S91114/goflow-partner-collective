@@ -86,16 +86,16 @@ export function RegistrationForm() {
         <div className="mx-auto grid size-12 place-items-center rounded-full bg-success/10 text-success">
           <Check className="size-6" />
         </div>
-        <h3 className="mt-4 text-xl font-extrabold">You're on the list</h3>
+        <h3 className="mt-4 text-xl font-extrabold">Access request saved</h3>
         <p className="mt-2 text-sm leading-6 text-muted-foreground">
-          We saved your profile for <b>{done}</b>. You can browse the Partner
-          Collective while we finish the email login setup.
+          We saved your profile for <b>{done}</b>. You can preview the Partner
+          Collective now while Goflow reviews the right partner paths for your brand.
         </p>
         <Link
           href="/collective"
           className="mt-5 inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary/90"
         >
-          Browse the catalog <ArrowRight className="size-4" />
+          Preview the catalog <ArrowRight className="size-4" />
         </Link>
       </div>
     );
@@ -104,13 +104,13 @@ export function RegistrationForm() {
   return (
     <form onSubmit={onSubmit} className="grid gap-3.5">
       <Field label="Full name" required>
-        <input name="name" required autoComplete="name" className={inputCls} />
+        <input name="name" required autoComplete="name" placeholder="Jordan Rivera" className={inputCls} />
       </Field>
       <Field label="Work email" required>
-        <input name="email" type="email" required autoComplete="email" className={inputCls} />
+        <input name="email" type="email" required autoComplete="email" placeholder="you@brand.com" className={inputCls} />
       </Field>
       <Field label="Brand / company" required>
-        <input name="company" required autoComplete="organization" className={inputCls} />
+        <input name="company" required autoComplete="organization" placeholder="Your brand" className={inputCls} />
       </Field>
       <Field label="Website" required>
         <input name="website" required placeholder="yourbrand.com" className={inputCls} />
@@ -153,11 +153,11 @@ export function RegistrationForm() {
       >
         {submitting ? (
           <>
-            <Loader2 className="size-4 animate-spin" /> Saving profile
+            <Loader2 className="size-4 animate-spin" /> Saving request
           </>
         ) : (
           <>
-            Get access <Send className="size-4" />
+            Apply for access <Send className="size-4" />
           </>
         )}
       </button>

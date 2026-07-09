@@ -1,6 +1,7 @@
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { OFFERS, findOffer } from "@/lib/offers";
+import { syncLead } from "@/lib/lead-sync";
 import { notifyByEmail } from "@/lib/notifications";
 import { createAdminClient, hasAdminKey } from "@/lib/supabase/admin";
 import {
@@ -128,6 +129,18 @@ export async function POST(request: Request) {
           .map(([key, value]) => `${key}: ${value}`)
           .join("; "),
       },
+    });
+
+    await syncLead({
+      kind: "program_application",
+      name,
+      email,
+      company,
+      website,
+      program: offerName,
+      requestType,
+      details,
+      attribution,
     });
 
     return NextResponse.json({ ok: true, outboundUrl });

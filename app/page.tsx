@@ -1,5 +1,12 @@
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, Sparkles } from "lucide-react";
+import {
+  ArrowRight,
+  CheckCircle2,
+  LockKeyhole,
+  Sparkles,
+  TrendingUp,
+} from "lucide-react";
+import { RegistrationForm } from "./RegistrationForm";
 
 const channels = [
   "Amazon",
@@ -11,10 +18,25 @@ const channels = [
 ];
 
 const proof = [
-  "Curated channel programs",
-  "Warm Goflow intros",
-  "Goflow-owned application capture",
-  "Partner community access",
+  "Exclusive and invite-only marketplace paths",
+  "Potential program savings from $500K to $1M+",
+  "Warm Goflow introductions before partner handoff",
+  "One profile for marketplace, retail, and global expansion",
+];
+
+const logos = [
+  { name: "Amazon", src: "/logos/amazon.ico" },
+  { name: "Walmart", src: "/logos/walmart.ico" },
+  { name: "Target Plus", src: "/logos/target.ico" },
+  { name: "Macy's", src: "/logos/macys.ico" },
+  { name: "Lowe's", src: "/logos/lowes.ico" },
+  { name: "Temu", src: "/logos/temu.ico" },
+];
+
+const valueCards = [
+  ["$1M+", "Potential marketplace incentives and savings for eligible brands."],
+  ["$500K+", "Program-dependent savings opportunities surfaced behind access."],
+  ["Private paths", "Retail, international, and community programs not built for public browsing."],
 ];
 
 export default function Home() {
@@ -35,72 +57,130 @@ export default function Home() {
             href="/collective"
             className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground shadow-sm transition-colors hover:bg-muted"
           >
-            View catalog
+            Preview catalog
             <ArrowRight className="size-4" />
           </Link>
         </header>
 
-        <div className="relative mx-auto max-w-6xl px-6 pb-16 pt-8 lg:pb-20 lg:pt-14">
-          <div className="max-w-4xl">
+        <div className="relative mx-auto grid max-w-6xl gap-9 px-6 pb-14 pt-8 lg:grid-cols-[1.02fr_0.98fr] lg:items-start lg:pb-20 lg:pt-14">
+          <div>
             <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-border bg-card/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-primary backdrop-blur">
               <Sparkles className="size-3.5" />
-              Retail and marketplace access
+              Private marketplace access
             </p>
-            <h1 className="text-4xl font-extrabold leading-[1.02] tracking-tight text-balance sm:text-6xl">
-              Get matched to the marketplace programs Goflow can open for you.
+            <h1 className="max-w-[13ch] text-5xl font-black leading-[0.98] tracking-tight text-balance sm:text-7xl">
+              Unlock the marketplace programs most brands never see.
             </h1>
-            <p className="mt-5 max-w-2xl text-lg leading-8 text-muted-foreground">
-              Explore the Partner Collective: a curated catalog of retail,
-              marketplace, international, and community programs built for
-              ecommerce brands ready to expand.
+            <p className="mt-6 max-w-2xl text-lg leading-8 text-muted-foreground">
+              Apply once to see curated retail, marketplace, international, and
+              partner programs Goflow can route for your brand, including
+              potential savings opportunities from $500K to $1M+ for eligible
+              sellers.
             </p>
 
-            <div className="mt-8 flex flex-wrap items-center gap-3">
-              <Link
-                href="/collective"
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/20 transition-colors hover:bg-primary/90"
-              >
-                View catalog <ArrowRight className="size-4" />
-              </Link>
-              <span className="text-sm font-semibold text-muted-foreground">
-                Browse instantly
-              </span>
+            <div className="mt-7 grid gap-3 sm:grid-cols-3">
+              {valueCards.map(([metric, body]) => (
+                <div key={metric} className="rounded-xl border border-border bg-card/80 p-4 shadow-sm">
+                  <div className="flex items-center gap-2 text-2xl font-black text-foreground">
+                    <TrendingUp className="size-5 text-primary" />
+                    {metric}
+                  </div>
+                  <p className="mt-2 text-xs font-medium leading-5 text-muted-foreground">
+                    {body}
+                  </p>
+                </div>
+              ))}
             </div>
 
-            <div className="mt-8 grid gap-3 sm:grid-cols-2">
+            <div className="mt-7 grid gap-3 sm:grid-cols-2">
               {proof.map((item) => (
-                <div key={item} className="flex items-center gap-2 text-sm font-semibold">
-                  <CheckCircle2 className="size-4 text-success" />
+                <div key={item} className="flex items-start gap-2 text-sm font-semibold leading-6">
+                  <CheckCircle2 className="mt-0.5 size-4 flex-none text-success" />
                   {item}
                 </div>
               ))}
             </div>
 
-            <div className="mt-9 flex flex-wrap gap-2">
-              {channels.map((channel) => (
-                <span
-                  key={channel}
-                  className="rounded-md border border-border bg-card/80 px-3 py-1.5 text-sm font-semibold text-muted-foreground"
-                >
-                  {channel}
-                </span>
-              ))}
+            <div className="mt-8">
+              <p className="mb-3 text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                Programs inside the collective
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {logos.map((logo) => (
+                  <span
+                    key={logo.name}
+                    className="inline-flex items-center gap-2 rounded-lg border border-border bg-card/90 px-3 py-2 text-sm font-bold text-foreground shadow-sm"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={logo.src} alt="" className="size-5 rounded-sm" />
+                    {logo.name}
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
+
+          <aside className="rounded-2xl border border-border bg-card p-5 shadow-xl shadow-primary/10 sm:p-7">
+            <div className="mb-5 flex items-start justify-between gap-4">
+              <div>
+                <p className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em] text-primary">
+                  <LockKeyhole className="size-3.5" />
+                  Apply for access
+                </p>
+                <h2 className="mt-2 text-2xl font-black tracking-tight">
+                  See which programs your brand may qualify for.
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                  We use this profile to route your request, preserve source
+                  attribution, and follow up with the right partner path.
+                </p>
+              </div>
+            </div>
+            <RegistrationForm />
+          </aside>
         </div>
       </section>
 
-      <section className="border-t border-border bg-card/45">
-        <div className="mx-auto grid max-w-6xl gap-6 px-6 py-12 md:grid-cols-3">
+      <section className="border-y border-border bg-card/45">
+        <div className="mx-auto grid max-w-6xl gap-6 px-6 py-10 md:grid-cols-3">
           {[
-            ["Discover", "Filter programs by channel, category, geography, and seller stage."],
-            ["Connect", "Submit Goflow-owned program requests before any partner handoff."],
-            ["Track", "Every request and outbound click lands in Supabase."],
+            ["Discover", "Filter programs by channel, category, geography, and seller stage once inside the catalog."],
+            ["Apply", "Submit Goflow-owned program requests before any partner handoff or outbound application."],
+            ["Track", "Every access request, program application, and partner click is saved for follow-up."],
           ].map(([title, body]) => (
             <div key={title}>
               <h3 className="text-base font-extrabold">{title}</h3>
               <p className="mt-2 text-sm leading-6 text-muted-foreground">{body}</p>
             </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-6 py-12">
+        <div className="grid gap-4 md:grid-cols-[0.9fr_1.1fr] md:items-center">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">
+              Built as a lead magnet
+            </p>
+            <h2 className="mt-2 text-3xl font-black tracking-tight">
+              The catalog stays valuable because the best paths are not public links.
+            </h2>
+          </div>
+          <p className="text-sm leading-7 text-muted-foreground">
+            The page should convert because access has a concrete payoff:
+            eligible brands can uncover marketplace openings, retail partner
+            paths, and savings opportunities that are usually scattered across
+            partner portals, private forms, and manual introductions.
+          </p>
+        </div>
+        <div className="mt-7 flex flex-wrap gap-2">
+          {channels.map((channel) => (
+            <span
+              key={channel}
+              className="rounded-md border border-border bg-card/80 px-3 py-1.5 text-sm font-semibold text-muted-foreground"
+            >
+              {channel}
+            </span>
           ))}
         </div>
       </section>
