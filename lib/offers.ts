@@ -63,9 +63,6 @@ const CATEGORY_FIELD = (options?: string[]): CollectField =>
     ? { name: "category", label: "Primary category", type: "select", options }
     : { name: "category", label: "Primary category", type: "text" };
 
-// TODO: replace with the real WhatsApp group invite link when available.
-const WHATSAPP_INVITE_URL = "https://chat.whatsapp.com/";
-
 export const OFFERS: Offer[] = [
   {
     id: "amazon-mcf",
@@ -439,29 +436,11 @@ export const OFFERS: Offer[] = [
         name: "location",
         label: "Preferred location",
         type: "select",
-        options: ["NYC", "MIA", "NJ"],
+        options: ["New York City", "Miami", "New Jersey", "Other"],
         required: true,
       },
     ],
     cta: "Request an invite",
-  },
-  {
-    id: "whatsapp-community",
-    name: "WhatsApp Group",
-    fullName: "Join the Partner WhatsApp Group",
-    logo: "/logos/whatsapp.svg",
-    brand: "#25D366",
-    type: "Community",
-    filters: ["Community"],
-    tags: ["Community", "Real-time", "Free"],
-    description:
-      "Join the Goflow partner WhatsApp group to swap notes with other ecommerce brands, get channel and deal alerts, and reach the Goflow team directly.",
-    whoItsFor: "",
-    requirements: [],
-    process: [],
-    collect: [],
-    link: WHATSAPP_INVITE_URL,
-    cta: "Join the WhatsApp group",
   },
 ];
 

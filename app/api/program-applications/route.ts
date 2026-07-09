@@ -71,8 +71,11 @@ export async function POST(request: Request) {
       : createSupabaseClient(url, key, {
           auth: { persistSession: false, autoRefreshToken: false },
         });
+    const submittedOfferName = cleanString(body.offerName, 160);
     const offerName =
-      offerId === "general" ? "Talk to Goflow" : offer?.fullName ?? offerId;
+      offerId === "general"
+        ? submittedOfferName || "Talk to Goflow"
+        : offer?.fullName ?? offerId;
     const outboundUrl =
       offer?.apply?.url || offer?.link || offer?.website || null;
     const profileSnapshot = {

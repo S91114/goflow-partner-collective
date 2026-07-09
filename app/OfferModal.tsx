@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, type ReactNode } from "react";
-import { ArrowUpRight, Check, X } from "lucide-react";
+import { ArrowUpRight, Check, ShoppingBag, X } from "lucide-react";
 import type { Offer } from "@/lib/offers";
 import { BrandLogo } from "./BrandLogo";
 import { InterestForm } from "./InterestForm";
@@ -9,9 +9,13 @@ import { InterestForm } from "./InterestForm";
 export function OfferModal({
   offer,
   onClose,
+  onAddToCart,
+  inCart,
 }: {
   offer: Offer | null;
   onClose: () => void;
+  onAddToCart?: (offer: Offer) => void;
+  inCart?: boolean;
 }) {
   const open = Boolean(offer);
 
@@ -57,7 +61,7 @@ export function OfferModal({
   const outboundLabel = offer.apply
     ? offer.apply.label ?? "Continue to partner application"
     : offer.link
-      ? offer.cta ?? "Continue to WhatsApp"
+      ? offer.cta ?? "Continue"
       : undefined;
 
   function trackVisitSite() {
@@ -190,6 +194,27 @@ export function OfferModal({
             Tell us about your brand first. Goflow captures the request, then
             routes you to the right partner path when one is available.
           </p>
+          {offer.id !== "general" && onAddToCart && (
+            <button
+              type="button"
+              onClick={() => onAddToCart(offer)}
+              className={`mb-3 inline-flex w-full items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-bold transition-colors ${
+                inCart
+                  ? "border-success/25 bg-success/10 text-success"
+                  : "border-primary/20 bg-primary/10 text-primary hover:bg-primary/15"
+              }`}
+            >
+              {inCart ? (
+                <>
+                  <Check className="size-4" /> Added to request cart
+                </>
+              ) : (
+                <>
+                  <ShoppingBag className="size-4" /> Add to request cart
+                </>
+              )}
+            </button>
+          )}
           <InterestForm
             offerId={offer.id}
             offerName={offer.fullName}
