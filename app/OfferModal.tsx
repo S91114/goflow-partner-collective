@@ -85,9 +85,6 @@ export function OfferModal({
         >
           <div>
             <BrandLogo offer={offer} size={68} />
-            <span className="mt-4 inline-block w-fit rounded-md border border-border px-2 py-1 text-[10.5px] font-semibold uppercase tracking-wider text-muted-foreground">
-              {offer.type}
-            </span>
             <h2 className="mt-3 text-3xl font-extrabold leading-[1.1] tracking-tight text-balance">
               {offer.fullName}
             </h2>
@@ -159,11 +156,12 @@ export function OfferModal({
 
         {/* Right: add-only request action */}
         <div className="flex flex-col border-t border-border bg-muted/30 p-7 sm:p-9 md:border-l md:border-t-0">
-          <h3 className="text-lg font-bold tracking-tight">Add to intro requests</h3>
+          <h3 className="text-lg font-bold tracking-tight">
+            Add to introduction requests
+          </h3>
           <p className="mt-2 text-[13px] leading-6 text-muted-foreground">
-            Add this program to your selected requests. You will fill out one
-            profile with phone, company, and store details when you review the
-            bundle.
+            You are one form away from getting a bundle of introductions. Add
+            this program, then submit one profile for Goflow to route.
           </p>
           {offer.id !== "general" && onAddToCart && (
             <button
@@ -177,20 +175,14 @@ export function OfferModal({
             >
               {inCart ? (
                 <>
-                  <Check className="size-4" /> Added to intro requests
+                  <Check className="size-4" /> Added to introduction requests
                 </>
               ) : (
                 <>
-                  <ShoppingBag className="size-4" /> Add to intro requests
+                  <ShoppingBag className="size-4" /> Add to introduction requests
                 </>
               )}
             </button>
-          )}
-          {offer.apply?.url && (
-            <p className="mt-3 rounded-xl border border-border bg-background p-3 text-xs leading-5 text-muted-foreground">
-              Partner application links unlock after Goflow captures the intro
-              request, so your team has the lead and routing context first.
-            </p>
           )}
         </div>
       </div>

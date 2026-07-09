@@ -26,7 +26,7 @@ export function CartRequestForm({
 
     const payload = {
       offerId: "general",
-      offerName: "Partner Collective Intro Requests",
+      offerName: "Partner Collective Introduction Bundle",
       requestType: "general",
       selectedPrograms: selectedOffers.map((offer) => ({
         offerId: offer.id,
@@ -77,7 +77,9 @@ export function CartRequestForm({
         <div className="mx-auto grid size-12 place-items-center rounded-full bg-success/10 text-success">
           <Check className="size-6" />
         </div>
-        <h3 className="mt-4 text-xl font-extrabold">Intro requests sent</h3>
+        <h3 className="mt-4 text-xl font-extrabold">
+          Introduction requests sent
+        </h3>
         <p className="mt-2 text-sm leading-6 text-muted-foreground">
           Thanks, {done}. Goflow received your selected programs and will route
           the right partner path from here.
@@ -165,11 +167,11 @@ export function CartRequestForm({
       >
         {submitting ? (
           <>
-            <Loader2 className="size-4 animate-spin" /> Sending requests
+            <Loader2 className="size-4 animate-spin" /> Sending introductions
           </>
         ) : (
           <>
-            Send intro requests <Send className="size-4" />
+            Send introduction requests <Send className="size-4" />
           </>
         )}
       </button>

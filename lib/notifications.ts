@@ -51,12 +51,23 @@ export async function sendLeadConfirmationEmail({
   program?: string;
 }): Promise<EmailSendResult> {
   const firstName = name.split(" ")[0] || "there";
-  const subject = program
-    ? `We received your ${program} request`
-    : "Your Goflow Partner Collective request is in";
-  const preview = program
-    ? `Goflow received your ${program} request for ${company}.`
-    : `Goflow received your Partner Collective access request for ${company}.`;
+  const isBundle = program?.toLowerCase().includes("introduction bundle");
+  const subject = isBundle
+    ? "Your Goflow introduction requests are in"
+    : program
+      ? `We received your ${program} request`
+      : "Your Goflow Partner Collective request is in";
+  const preview = isBundle
+    ? `Goflow received your introduction requests for ${company}.`
+    : program
+      ? `Goflow received your ${program} request for ${company}.`
+      : `Goflow received your Partner Collective access request for ${company}.`;
+  const heading = isBundle
+    ? "Your introduction requests are in."
+    : "We received your request.";
+  const introLine = isBundle
+    ? `Hi ${escapeHtml(firstName)}, thanks for submitting ${escapeHtml(company)}'s introduction requests. We saved your profile and will use it to route your selected programs to the right partner paths.`
+    : `Hi ${escapeHtml(firstName)}, thanks for submitting ${escapeHtml(company)}${program ? ` for ${escapeHtml(program)}` : ""}. We saved your profile and will use it to route you toward the marketplace, retail, international, and partner programs that may fit your brand.`;
 
   return sendEmail({
     to: [email],
@@ -68,11 +79,11 @@ export async function sendLeadConfirmationEmail({
           <div style="height:4px;background:#5a6cfb"></div>
           <div style="padding:28px">
             <p style="margin:0 0 12px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:#5a6cfb">Goflow Partner Collective</p>
-            <h1 style="margin:0 0 14px;font-size:28px;line-height:1.12;color:#22354c">We received your request.</h1>
-            <p style="margin:0 0 16px;font-size:15px;line-height:1.7;color:#53647a">Hi ${escapeHtml(firstName)}, thanks for submitting ${escapeHtml(company)}${program ? ` for ${escapeHtml(program)}` : ""}. We saved your profile and will use it to route you toward the marketplace, retail, international, and partner programs that may fit your brand.</p>
+            <h1 style="margin:0 0 14px;font-size:28px;line-height:1.12;color:#22354c">${escapeHtml(heading)}</h1>
+            <p style="margin:0 0 16px;font-size:15px;line-height:1.7;color:#53647a">${introLine}</p>
             <p style="margin:0 0 18px;font-size:15px;line-height:1.7;color:#53647a">Eligible brands may uncover invite-only marketplace paths, warm Goflow introductions, and potential program savings from $500K to $1M+ depending on qualification and partner terms.</p>
             <a href="${SITE_URL}/collective" style="display:inline-block;background:#5a6cfb;color:#ffffff;text-decoration:none;font-weight:700;border-radius:10px;padding:12px 18px;font-size:14px">Preview the catalog</a>
-            <p style="margin:22px 0 0;font-size:13px;line-height:1.6;color:#6b7a90">If anything in your profile needs to be corrected, reply to this email and the Goflow team will adjust it before routing.</p>
+            <p style="margin:22px 0 0;font-size:13px;line-height:1.6;color:#6b7a90">If anything in your profile needs to be corrected, reply to this email and the Goflow team will adjust it before making introductions.</p>
           </div>
         </div>
       </div>

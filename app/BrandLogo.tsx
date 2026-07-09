@@ -29,6 +29,22 @@ export function BrandLogo({
   }
 
   const label = offer.wordmark ?? offer.name;
+  if (label.length > 8 && size >= 50) {
+    return (
+      <div
+        className="grid flex-none place-items-center rounded-2xl border border-border bg-white px-3 text-center font-black uppercase tracking-wide text-neutral-950 shadow-sm"
+        style={{
+          width: Math.round(size * 1.62),
+          height: size,
+          fontSize: Math.max(11, size * 0.17),
+        }}
+        aria-hidden
+      >
+        {label}
+      </div>
+    );
+  }
+
   return (
     <div
       className="grid flex-none place-items-center rounded-2xl px-1.5 text-center font-bold leading-none text-white shadow-sm"

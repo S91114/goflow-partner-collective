@@ -199,7 +199,8 @@ export function CollectiveCatalog({ offers }: { offers: Offer[] }) {
           </h1>
           <p className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
             Browse partner programs, open details, and add the paths you want to
-            your intro requests. Goflow will route the full bundle from one profile.
+            your introduction requests. Goflow will route the full bundle from
+            one profile.
           </p>
         </div>
       </section>
@@ -329,9 +330,6 @@ function OfferCard({
       />
       <div className="flex items-start justify-between gap-3">
         <BrandLogo offer={offer} size={56} />
-        <span className="max-w-[9rem] truncate rounded-md border border-border px-2 py-1 text-[10.5px] font-semibold uppercase tracking-wider text-muted-foreground">
-          {offer.type}
-        </span>
       </div>
       <div>
         <h3 className="text-[19px] font-extrabold leading-tight tracking-tight text-balance">
@@ -364,8 +362,8 @@ function OfferCard({
           onClick={onToggleCart}
           aria-label={
             inCart
-              ? `Remove ${offer.fullName} from intro requests`
-              : `Add ${offer.fullName} to intro requests`
+              ? `Remove ${offer.fullName} from introduction requests`
+              : `Add ${offer.fullName} to introduction requests`
           }
           className={`inline-flex min-w-11 items-center justify-center rounded-xl px-3 py-2.5 text-sm font-bold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring ${
             inCart
@@ -404,7 +402,7 @@ function RequestsWidget({
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-primary">
-            Intro requests
+            Introduction requests
           </p>
           <h2 className="mt-1 text-lg font-black tracking-tight">
             {selectedOffers.length} selected
@@ -413,7 +411,7 @@ function RequestsWidget({
         <button
           type="button"
           onClick={onClose}
-          aria-label="Hide intro requests"
+          aria-label="Hide introduction requests"
           className="grid size-9 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >
           <X className="size-4" />
@@ -440,9 +438,8 @@ function RequestsWidget({
             >
               <X className="size-4" />
             </button>
-            <p className="truncate text-xs text-muted-foreground">{offer.type}</p>
             <p className="truncate text-[11px] font-semibold text-primary">
-              Intro request
+              Introduction request
             </p>
           </div>
         ))}
@@ -458,7 +455,7 @@ function RequestsWidget({
         disabled={selectedOffers.length === 0}
         className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
       >
-        Review intro requests <ChevronRight className="size-4" />
+        Review introduction requests <ChevronRight className="size-4" />
       </button>
     </aside>
   );
@@ -497,7 +494,7 @@ function CartModal({
       className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-foreground/50 p-0 backdrop-blur-sm sm:p-6"
       role="dialog"
       aria-modal="true"
-      aria-label="Intro requests"
+      aria-label="Introduction requests"
       onClick={onClose}
     >
       <div
@@ -508,12 +505,13 @@ function CartModal({
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-primary">
-                Intro requests
+                Introduction requests
               </p>
               <h2 className="mt-2 text-2xl font-black tracking-tight">
-                Send your intro requests
+                Send your introduction requests
               </h2>
               <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                You are one form away from getting a bundle of introductions.
                 Goflow will use one profile to route the full bundle.
               </p>
             </div>
