@@ -3,6 +3,11 @@ const DEFAULT_FROM = "Partner Collective <onboarding@resend.dev>";
 const SITE_URL =
   process.env.COLLECTIVE_SITE_URL || "https://goflowpartnercollective.com";
 
+export type EmailSendResult = {
+  status: "sent" | "skipped" | "failed";
+  error?: string;
+};
+
 export async function notifyByEmail({
   subject,
   title,
@@ -13,7 +18,7 @@ export async function notifyByEmail({
   title: string;
   intro: string;
   rows: Record<string, string | null | undefined>;
-}) {
+}): Promise<EmailSendResult> {
   const rowHtml = Object.entries(rows)
     .filter(([, value]) => value)
     .map(
@@ -22,7 +27,7 @@ export async function notifyByEmail({
     )
     .join("");
 
-  await sendEmail({
+  return sendEmail({
     to: [NOTIFY_TO],
     subject,
     html: `
@@ -44,7 +49,7 @@ export async function sendLeadConfirmationEmail({
   email: string;
   company: string;
   program?: string;
-}) {
+}): Promise<EmailSendResult> {
   const firstName = name.split(" ")[0] || "there";
   const subject = program
     ? `We received your ${program} request`
@@ -53,7 +58,7 @@ export async function sendLeadConfirmationEmail({
     ? `Goflow received your ${program} request for ${company}.`
     : `Goflow received your Partner Collective access request for ${company}.`;
 
-  await sendEmail({
+  return sendEmail({
     to: [email],
     subject,
     html: `
@@ -86,10 +91,12 @@ async function sendEmail({
   subject: string;
   html: string;
   logLabel: string;
-}) {
+}): Promise<EmailSendResult> {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.COLLECTIVE_NOTIFY_FROM || DEFAULT_FROM;
-  if (!apiKey) return;
+  if (!apiKey) {
+    return { status: "skipped", error: "RESEND_API_KEY is not configured." };
+  }
 
   try {
     const res = await fetch("https://api.resend.com/emails", {
@@ -106,10 +113,17 @@ async function sendEmail({
       }),
     });
     if (!res.ok) {
-      console.error(`[collective] ${logLabel} failed:`, await res.text());
+      const error = await res.text();
+      console.error(`[collective] ${logLabel} failed:`, error);
+      return { status: "failed", error };
     }
+    return { status: "sent" };
   } catch (err) {
     console.error(`[collective] ${logLabel} threw:`, err);
+    return {
+      status: "failed",
+      error: err instanceof Error ? err.message : "Unknown email send error.",
+    };
   }
 }
 

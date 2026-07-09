@@ -28,6 +28,10 @@ export function CartRequestForm({
       offerId: "general",
       offerName: "Partner Collective Cart",
       requestType: "general",
+      selectedPrograms: selectedOffers.map((offer) => ({
+        offerId: offer.id,
+        offerName: offer.fullName,
+      })),
       name: String(data.get("name") || "").trim(),
       email: String(data.get("email") || "").trim(),
       company: String(data.get("company") || "").trim(),

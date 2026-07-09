@@ -1,5 +1,10 @@
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
+import {
+  logEmailAutomation,
+  updateCustomerRegistration,
+  upsertCustomer,
+} from "@/lib/customers";
 import { createAdminClient, hasAdminKey } from "@/lib/supabase/admin";
 import { syncLead } from "@/lib/lead-sync";
 import { notifyByEmail, sendLeadConfirmationEmail } from "@/lib/notifications";
@@ -59,18 +64,36 @@ export async function POST(request: Request) {
       : createSupabaseClient(url, key, {
           auth: { persistSession: false, autoRefreshToken: false },
         });
-    const { error } = await writeClient.from("registrations").insert({
+
+    const customerId = await upsertCustomer(writeClient, {
       name,
       email,
       company,
       website,
       category,
-      gmv_band: gmvBand,
-      current_channels: currentChannels,
+      gmvBand,
+      currentChannels,
       notes,
-      ...attribution,
-      status: "registered",
+      metadata: { attribution },
     });
+
+    const { data: registration, error } = await writeClient
+      .from("registrations")
+      .insert({
+        customer_id: customerId,
+        name,
+        email,
+        company,
+        website,
+        category,
+        gmv_band: gmvBand,
+        current_channels: currentChannels,
+        notes,
+        ...attribution,
+        status: "registered",
+      })
+      .select("id")
+      .single();
 
     if (error) {
       console.error("[collective] registration insert failed:", error.message);
@@ -80,8 +103,12 @@ export async function POST(request: Request) {
       );
     }
 
-    await notifyByEmail({
-      subject: `New Partner Collective registration - ${company}`,
+    const registrationId = (registration?.id as string | undefined) ?? null;
+    await updateCustomerRegistration(writeClient, customerId, registrationId);
+
+    const internalSubject = `New Partner Collective registration - ${company}`;
+    const internalEmail = await notifyByEmail({
+      subject: internalSubject,
       title: "New Partner Collective registration",
       intro: `${name} from ${company} requested access.`,
       rows: {
@@ -95,11 +122,32 @@ export async function POST(request: Request) {
         Campaign: attribution.utm_campaign,
       },
     });
+    await logEmailAutomation(writeClient, {
+      customerId,
+      registrationId,
+      template: "internal_registration_alert",
+      recipientEmail: process.env.COLLECTIVE_NOTIFY_EMAIL || "sadya@goflow.com",
+      subject: internalSubject,
+      status: internalEmail.status,
+      error: internalEmail.error,
+      metadata: { company, category, gmvBand },
+    });
 
-    await sendLeadConfirmationEmail({
+    const leadSubject = "Your Goflow Partner Collective request is in";
+    const leadEmail = await sendLeadConfirmationEmail({
       name,
       email,
       company,
+    });
+    await logEmailAutomation(writeClient, {
+      customerId,
+      registrationId,
+      template: "lead_confirmation",
+      recipientEmail: email,
+      subject: leadSubject,
+      status: leadEmail.status,
+      error: leadEmail.error,
+      metadata: { company },
     });
 
     await syncLead({
