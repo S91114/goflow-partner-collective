@@ -30,7 +30,7 @@ row-level-security policies (public can submit, only your team can read).
 | --- | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | ✅ | Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | ✅ | Supabase publishable (anon) key |
-| `SUPABASE_SECRET_KEY` | — | Server-only key used by API routes for admin writes once the gate is re-enabled |
+| `SUPABASE_SECRET_KEY` or `SUPABASE_SERVICE_ROLE_KEY` | Recommended | Server-only key used by API routes to link customers, applications, and email automation events |
 | `COLLECTIVE_NOTIFY_EMAIL` | — | Where interest notifications go (default `sadya@goflow.com`) |
 | `RESEND_API_KEY` | — | Enables email notifications via [Resend](https://resend.com) |
 | `COLLECTIVE_NOTIFY_FROM` | — | From-address for notification emails |

@@ -123,6 +123,7 @@ export const OFFERS: Offer[] = [
   },
   {
     id: "walmart-nss",
+    website: "https://marketplace.walmart.com/",
     apply: {
       url: "https://marketplace.walmart.com/nss-cp/?utm_source=goflow&utm_medium=channelpartner&utm_campaign=40235183-fy27-us-mp-cp-gfl-nss-nss",
       label: "Apply — up to $75K in savings",

@@ -13,6 +13,8 @@ const eventTypes = new Set([
   "visit_site_click",
   "partner_apply_click",
   "join_click",
+  "cart_add",
+  "cart_remove",
 ]);
 
 export async function POST(request: Request) {

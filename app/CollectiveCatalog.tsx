@@ -11,7 +11,7 @@ import {
   X,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { FILTERS, findOffer, filterOffers, type Offer } from "@/lib/offers";
+import { findOffer, type Offer } from "@/lib/offers";
 import { BrandLogo } from "./BrandLogo";
 import { CartRequestForm } from "./CartRequestForm";
 import { OfferModal } from "./OfferModal";
@@ -42,7 +42,6 @@ function resolve(id: string | null): Offer | null {
 
 export function CollectiveCatalog({ offers }: { offers: Offer[] }) {
   const [selected, setSelected] = useState<Offer | null>(null);
-  const [activeFilter, setActiveFilter] = useState<(typeof FILTERS)[number]>("All");
   const [query, setQuery] = useState("");
   const [cartIds, setCartIds] = useState<string[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
@@ -89,10 +88,9 @@ export function CollectiveCatalog({ offers }: { offers: Offer[] }) {
   }, []);
 
   const visibleOffers = useMemo(() => {
-    const filtered = filterOffers(offers, activeFilter);
     const q = query.trim().toLowerCase();
-    if (!q) return filtered;
-    return filtered.filter((offer) =>
+    if (!q) return offers;
+    return offers.filter((offer) =>
       [
         offer.name,
         offer.fullName,
@@ -106,7 +104,7 @@ export function CollectiveCatalog({ offers }: { offers: Offer[] }) {
         .toLowerCase()
         .includes(q),
     );
-  }, [activeFilter, offers, query]);
+  }, [offers, query]);
 
   const selectedOffers = useMemo(
     () => cartIds.map((id) => offers.find((offer) => offer.id === id)).filter(Boolean) as Offer[],
@@ -114,11 +112,6 @@ export function CollectiveCatalog({ offers }: { offers: Offer[] }) {
   );
 
   const selectedIdSet = useMemo(() => new Set(cartIds), [cartIds]);
-
-  function updateFilter(filter: (typeof FILTERS)[number]) {
-    setActiveFilter(filter);
-    track("filter_used", { filter });
-  }
 
   function updateQuery(value: string) {
     setQuery(value);
@@ -162,14 +155,25 @@ export function CollectiveCatalog({ offers }: { offers: Offer[] }) {
               Partner Collective
             </span>
           </div>
-          <button
-            type="button"
-            onClick={() => open(GENERAL_OFFER)}
-            className="shrink-0 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 sm:px-4"
-          >
-            <span className="hidden sm:inline">Talk to Goflow</span>
-            <span className="sm:hidden">Talk</span>
-          </button>
+          <div className="flex min-w-0 flex-1 items-center justify-end gap-2">
+            <label className="relative hidden w-full max-w-sm sm:block">
+              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <input
+                value={query}
+                onChange={(e) => updateQuery(e.target.value)}
+                placeholder="Search programs"
+                className="w-full rounded-lg border border-input bg-background py-2 pl-9 pr-3 text-sm outline-none transition focus:border-primary focus:ring-[3px] focus:ring-primary/20"
+              />
+            </label>
+            <button
+              type="button"
+              onClick={() => open(GENERAL_OFFER)}
+              className="shrink-0 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 sm:px-4"
+            >
+              <span className="hidden sm:inline">Talk to Goflow</span>
+              <span className="sm:hidden">Talk</span>
+            </button>
+          </div>
         </div>
         <div
           className="absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-primary via-sky to-amber"
@@ -196,26 +200,10 @@ export function CollectiveCatalog({ offers }: { offers: Offer[] }) {
       </section>
 
       {/* Grid */}
-      <main className="mx-auto grid max-w-6xl gap-5 px-4 pb-24 pt-4 sm:px-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <main className="mx-auto max-w-6xl px-4 pb-24 pt-4 sm:px-6 lg:pr-[360px]">
         <div className="min-w-0">
-          <div className="mb-5 flex flex-col gap-3 rounded-2xl border border-border bg-card p-3 shadow-sm md:flex-row md:items-center md:justify-between">
-            <div className="flex flex-wrap gap-2">
-              {FILTERS.map((filter) => (
-                <button
-                  key={filter}
-                  type="button"
-                  onClick={() => updateFilter(filter)}
-                  className={`rounded-lg px-3 py-2 text-xs font-bold transition-colors ${
-                    activeFilter === filter
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {filter}
-                </button>
-              ))}
-            </div>
-            <label className="relative min-w-0 md:w-72">
+          <div className="mb-5 rounded-2xl border border-border bg-card p-3 shadow-sm sm:hidden">
+            <label className="relative block min-w-0">
               <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <input
                 value={query}
@@ -245,13 +233,12 @@ export function CollectiveCatalog({ offers }: { offers: Offer[] }) {
               </p>
             </div>
           )}
+          <CartPanel
+            selectedOffers={selectedOffers}
+            onOpenCart={() => setCartOpen(true)}
+            onRemove={removeFromCart}
+          />
         </div>
-
-        <CartPanel
-          selectedOffers={selectedOffers}
-          onOpenCart={() => setCartOpen(true)}
-          onRemove={removeFromCart}
-        />
       </main>
 
       {/* Footer */}
@@ -387,8 +374,10 @@ function CartPanel({
   onOpenCart: () => void;
   onRemove: (offerId: string) => void;
 }) {
+  const slots = [0, 1, 2];
+
   return (
-    <aside className="sticky top-20 hidden h-fit rounded-2xl border border-border bg-card p-4 shadow-sm lg:block">
+    <aside className="fixed right-6 top-20 z-30 hidden w-80 rounded-2xl border border-border bg-card p-4 shadow-xl shadow-primary/10 lg:block">
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-primary">
@@ -405,14 +394,14 @@ function CartPanel({
       <p className="mt-3 text-sm leading-6 text-muted-foreground">
         Add multiple programs and send one profile to Goflow for routing.
       </p>
-      <div className="mt-4 flex max-h-[320px] flex-col gap-2 overflow-y-auto">
-        {selectedOffers.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-border bg-muted/40 p-4 text-sm text-muted-foreground">
-            Your cart is empty. Add programs from the marketplace grid.
-          </div>
-        ) : (
-          selectedOffers.map((offer) => (
-            <div key={offer.id} className="flex items-center gap-3 rounded-xl border border-border bg-background p-2.5">
+      <div className="mt-4 grid gap-2">
+        {slots.map((slot) => {
+          const offer = selectedOffers[slot];
+          return offer ? (
+            <div
+              key={offer.id}
+              className="flex min-h-16 items-center gap-3 rounded-xl border border-border bg-background p-2.5 shadow-sm"
+            >
               <BrandLogo offer={offer} size={34} />
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-bold">{offer.name}</p>
@@ -427,7 +416,21 @@ function CartPanel({
                 <X className="size-4" />
               </button>
             </div>
-          ))
+          ) : (
+            <div
+              key={slot}
+              className="flex min-h-16 items-center rounded-xl border border-dashed border-border bg-muted/35 px-3 text-sm text-muted-foreground"
+            >
+              {slot === 0
+                ? "Add programs from the marketplace grid."
+                : "Open slot"}
+            </div>
+          );
+        })}
+        {selectedOffers.length > 3 && (
+          <p className="rounded-lg bg-primary/10 px-3 py-2 text-xs font-bold text-primary">
+            +{selectedOffers.length - 3} more selected
+          </p>
         )}
       </div>
       <button

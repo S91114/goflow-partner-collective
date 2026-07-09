@@ -73,7 +73,8 @@ export async function POST(request: Request) {
   }
 
   try {
-    const writeClient = hasAdminKey()
+    const adminWritesEnabled = hasAdminKey();
+    const writeClient = adminWritesEnabled
       ? createAdminClient()
       : createSupabaseClient(url, key, {
           auth: { persistSession: false, autoRefreshToken: false },
@@ -91,17 +92,19 @@ export async function POST(request: Request) {
     const outboundUrl =
       offer?.apply?.url || offer?.link || offer?.website || null;
 
-    const customerId = await upsertCustomer(writeClient, {
-      name,
-      email,
-      company,
-      website,
-      metadata: {
-        lastRequestType: requestType,
-        lastOfferId: offerId,
-        lastOfferName: offerName,
-      },
-    });
+    const customerId = adminWritesEnabled
+      ? await upsertCustomer(writeClient, {
+          name,
+          email,
+          company,
+          website,
+          metadata: {
+            lastRequestType: requestType,
+            lastOfferId: offerId,
+            lastOfferName: offerName,
+          },
+        })
+      : null;
 
     const profileSnapshot = {
       customer_id: customerId,
@@ -112,43 +115,55 @@ export async function POST(request: Request) {
       user_id: null,
     };
 
-    const { data: application, error } = await writeClient
-      .from("program_applications")
-      .insert({
-        user_id: null,
-        customer_id: customerId,
-        offer_id: offerId,
-        offer_name: offerName,
-        request_type: requestType,
-        name,
-        email,
-        company,
-        website,
-        details,
-        profile_snapshot: profileSnapshot,
-        outbound_url: outboundUrl,
-        ...attribution,
-      })
-      .select("id")
-      .single();
+    const applicationPayload = {
+      user_id: null,
+      ...(customerId ? { customer_id: customerId } : {}),
+      offer_id: offerId,
+      offer_name: offerName,
+      request_type: requestType,
+      name,
+      email,
+      company,
+      website,
+      details,
+      profile_snapshot: profileSnapshot,
+      outbound_url: outboundUrl,
+      ...attribution,
+    };
 
-    if (error) {
-      console.error("[collective] program application failed:", error.message);
+    const applicationResult = adminWritesEnabled
+      ? await writeClient
+          .from("program_applications")
+          .insert(applicationPayload)
+          .select("id")
+          .single()
+      : await writeClient.from("program_applications").insert(applicationPayload);
+
+    if (applicationResult.error) {
+      console.error(
+        "[collective] program application failed:",
+        applicationResult.error.message,
+      );
       return NextResponse.json(
         { error: "We couldn't save your application. Please try again." },
         { status: 500 },
       );
     }
 
-    const applicationId = (application?.id as string | undefined) ?? null;
-    await upsertCustomerProgramInterests({
-      client: writeClient,
-      customerId,
-      programApplicationId: applicationId,
-      requestType,
-      selections: interestSelections,
-      details,
-    });
+    const applicationId =
+      adminWritesEnabled && applicationResult.data
+        ? ((applicationResult.data as { id?: string }).id ?? null)
+        : null;
+    if (adminWritesEnabled) {
+      await upsertCustomerProgramInterests({
+        client: writeClient,
+        customerId,
+        programApplicationId: applicationId,
+        requestType,
+        selections: interestSelections,
+        details,
+      });
+    }
 
     await writeClient.from("program_events").insert({
       user_id: null,
@@ -179,16 +194,18 @@ export async function POST(request: Request) {
           .join("; "),
       },
     });
-    await logEmailAutomation(writeClient, {
-      customerId,
-      programApplicationId: applicationId,
-      template: "internal_program_alert",
-      recipientEmail: process.env.COLLECTIVE_NOTIFY_EMAIL || "sadya@goflow.com",
-      subject: internalSubject,
-      status: internalEmail.status,
-      error: internalEmail.error,
-      metadata: { offerId, offerName, requestType },
-    });
+    if (adminWritesEnabled) {
+      await logEmailAutomation(writeClient, {
+        customerId,
+        programApplicationId: applicationId,
+        template: "internal_program_alert",
+        recipientEmail: process.env.COLLECTIVE_NOTIFY_EMAIL || "sadya@goflow.com",
+        subject: internalSubject,
+        status: internalEmail.status,
+        error: internalEmail.error,
+        metadata: { offerId, offerName, requestType },
+      });
+    }
 
     const leadSubject = `We received your ${offerName} request`;
     const leadEmail = await sendLeadConfirmationEmail({
@@ -197,20 +214,22 @@ export async function POST(request: Request) {
       company,
       program: offerName,
     });
-    await logEmailAutomation(writeClient, {
-      customerId,
-      programApplicationId: applicationId,
-      template: "program_confirmation",
-      recipientEmail: email,
-      subject: leadSubject,
-      status: leadEmail.status,
-      error: leadEmail.error,
-      metadata: {
-        offerId,
-        offerName,
-        selectedPrograms: interestSelections,
-      },
-    });
+    if (adminWritesEnabled) {
+      await logEmailAutomation(writeClient, {
+        customerId,
+        programApplicationId: applicationId,
+        template: "program_confirmation",
+        recipientEmail: email,
+        subject: leadSubject,
+        status: leadEmail.status,
+        error: leadEmail.error,
+        metadata: {
+          offerId,
+          offerName,
+          selectedPrograms: interestSelections,
+        },
+      });
+    }
 
     await syncLead({
       kind: "program_application",

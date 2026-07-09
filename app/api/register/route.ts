@@ -59,51 +59,64 @@ export async function POST(request: Request) {
   }
 
   try {
-    const writeClient = hasAdminKey()
+    const adminWritesEnabled = hasAdminKey();
+    const writeClient = adminWritesEnabled
       ? createAdminClient()
       : createSupabaseClient(url, key, {
           auth: { persistSession: false, autoRefreshToken: false },
         });
 
-    const customerId = await upsertCustomer(writeClient, {
+    const customerId = adminWritesEnabled
+      ? await upsertCustomer(writeClient, {
+          name,
+          email,
+          company,
+          website,
+          category,
+          gmvBand,
+          currentChannels,
+          notes,
+          metadata: { attribution },
+        })
+      : null;
+
+    const registrationPayload = {
+      ...(customerId ? { customer_id: customerId } : {}),
       name,
       email,
       company,
       website,
       category,
-      gmvBand,
-      currentChannels,
+      gmv_band: gmvBand,
+      current_channels: currentChannels,
       notes,
-      metadata: { attribution },
-    });
+      ...attribution,
+      status: "registered",
+    };
 
-    const { data: registration, error } = await writeClient
-      .from("registrations")
-      .insert({
-        customer_id: customerId,
-        name,
-        email,
-        company,
-        website,
-        category,
-        gmv_band: gmvBand,
-        current_channels: currentChannels,
-        notes,
-        ...attribution,
-        status: "registered",
-      })
-      .select("id")
-      .single();
+    const registrationResult = adminWritesEnabled
+      ? await writeClient
+          .from("registrations")
+          .insert(registrationPayload)
+          .select("id")
+          .single()
+      : await writeClient.from("registrations").insert(registrationPayload);
 
-    if (error) {
-      console.error("[collective] registration insert failed:", error.message);
+    if (registrationResult.error) {
+      console.error(
+        "[collective] registration insert failed:",
+        registrationResult.error.message,
+      );
       return NextResponse.json(
         { error: "We couldn't save your request. Please try again." },
         { status: 500 },
       );
     }
 
-    const registrationId = (registration?.id as string | undefined) ?? null;
+    const registrationId =
+      adminWritesEnabled && registrationResult.data
+        ? ((registrationResult.data as { id?: string }).id ?? null)
+        : null;
     await updateCustomerRegistration(writeClient, customerId, registrationId);
 
     const internalSubject = `New Partner Collective registration - ${company}`;
@@ -122,16 +135,18 @@ export async function POST(request: Request) {
         Campaign: attribution.utm_campaign,
       },
     });
-    await logEmailAutomation(writeClient, {
-      customerId,
-      registrationId,
-      template: "internal_registration_alert",
-      recipientEmail: process.env.COLLECTIVE_NOTIFY_EMAIL || "sadya@goflow.com",
-      subject: internalSubject,
-      status: internalEmail.status,
-      error: internalEmail.error,
-      metadata: { company, category, gmvBand },
-    });
+    if (adminWritesEnabled) {
+      await logEmailAutomation(writeClient, {
+        customerId,
+        registrationId,
+        template: "internal_registration_alert",
+        recipientEmail: process.env.COLLECTIVE_NOTIFY_EMAIL || "sadya@goflow.com",
+        subject: internalSubject,
+        status: internalEmail.status,
+        error: internalEmail.error,
+        metadata: { company, category, gmvBand },
+      });
+    }
 
     const leadSubject = "Your Goflow Partner Collective request is in";
     const leadEmail = await sendLeadConfirmationEmail({
@@ -139,16 +154,18 @@ export async function POST(request: Request) {
       email,
       company,
     });
-    await logEmailAutomation(writeClient, {
-      customerId,
-      registrationId,
-      template: "lead_confirmation",
-      recipientEmail: email,
-      subject: leadSubject,
-      status: leadEmail.status,
-      error: leadEmail.error,
-      metadata: { company },
-    });
+    if (adminWritesEnabled) {
+      await logEmailAutomation(writeClient, {
+        customerId,
+        registrationId,
+        template: "lead_confirmation",
+        recipientEmail: email,
+        subject: leadSubject,
+        status: leadEmail.status,
+        error: leadEmail.error,
+        metadata: { company },
+      });
+    }
 
     await syncLead({
       kind: "registration",
