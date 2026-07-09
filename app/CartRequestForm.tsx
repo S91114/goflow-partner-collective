@@ -26,7 +26,7 @@ export function CartRequestForm({
 
     const payload = {
       offerId: "general",
-      offerName: "Partner Collective Cart",
+      offerName: "Partner Collective Intro Requests",
       requestType: "general",
       selectedPrograms: selectedOffers.map((offer) => ({
         offerId: offer.id,
@@ -39,6 +39,9 @@ export function CartRequestForm({
       details: {
         "Selected programs": selectedProgramNames.join("; "),
         "Program count": String(selectedOffers.length),
+        Phone: String(data.get("phone") || "").trim(),
+        WhatsApp: String(data.get("whatsapp") || "").trim(),
+        "Amazon store": String(data.get("amazonStore") || "").trim(),
         "Priority or notes": String(data.get("notes") || "").trim(),
       },
       attribution: {
@@ -56,7 +59,7 @@ export function CartRequestForm({
       });
       const json = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setError(json.error || "We couldn't submit this request yet.");
+        setError(json.error || "We couldn't submit these requests yet.");
         return;
       }
       setDone(payload.name.split(" ")[0] || "there");
@@ -74,7 +77,7 @@ export function CartRequestForm({
         <div className="mx-auto grid size-12 place-items-center rounded-full bg-success/10 text-success">
           <Check className="size-6" />
         </div>
-        <h3 className="mt-4 text-xl font-extrabold">Cart sent</h3>
+        <h3 className="mt-4 text-xl font-extrabold">Intro requests sent</h3>
         <p className="mt-2 text-sm leading-6 text-muted-foreground">
           Thanks, {done}. Goflow received your selected programs and will route
           the right partner path from here.
@@ -116,6 +119,32 @@ export function CartRequestForm({
       <Field label="Website">
         <input name="website" placeholder="yourbrand.com" className={inputCls} />
       </Field>
+      <Field label="Phone number" required>
+        <input
+          name="phone"
+          type="tel"
+          required
+          autoComplete="tel"
+          placeholder="+1 555 123 4567"
+          className={inputCls}
+        />
+      </Field>
+      <Field label="WhatsApp number">
+        <input
+          name="whatsapp"
+          type="tel"
+          autoComplete="tel"
+          placeholder="If different from phone"
+          className={inputCls}
+        />
+      </Field>
+      <Field label="Amazon store">
+        <input
+          name="amazonStore"
+          placeholder="amazon.com/your-store"
+          className={inputCls}
+        />
+      </Field>
       <Field label="Notes or priority">
         <textarea
           name="notes"
@@ -136,11 +165,11 @@ export function CartRequestForm({
       >
         {submitting ? (
           <>
-            <Loader2 className="size-4 animate-spin" /> Sending cart
+            <Loader2 className="size-4 animate-spin" /> Sending requests
           </>
         ) : (
           <>
-            Send selected programs <Send className="size-4" />
+            Send intro requests <Send className="size-4" />
           </>
         )}
       </button>

@@ -45,6 +45,7 @@ export function CollectiveCatalog({ offers }: { offers: Offer[] }) {
   const [query, setQuery] = useState("");
   const [cartIds, setCartIds] = useState<string[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
+  const [requestsWidgetOpen, setRequestsWidgetOpen] = useState(false);
 
   // Open from ?offer= on first load (shareable links).
   useEffect(() => {
@@ -113,6 +114,10 @@ export function CollectiveCatalog({ offers }: { offers: Offer[] }) {
 
   const selectedIdSet = useMemo(() => new Set(cartIds), [cartIds]);
 
+  useEffect(() => {
+    if (selectedOffers.length === 0) setRequestsWidgetOpen(false);
+  }, [selectedOffers.length]);
+
   function updateQuery(value: string) {
     setQuery(value);
     if (value.trim().length >= 2) {
@@ -126,6 +131,7 @@ export function CollectiveCatalog({ offers }: { offers: Offer[] }) {
       if (current.includes(offer.id)) return current;
       return [...current, offer.id];
     });
+    setRequestsWidgetOpen(true);
     track("cart_add", { offerName: offer.fullName }, offer);
   }
 
@@ -194,13 +200,13 @@ export function CollectiveCatalog({ offers }: { offers: Offer[] }) {
           </h1>
           <p className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
             Browse partner programs, open details, and add the paths you want to
-            your request cart. Goflow will route the full bundle from one profile.
+            your intro requests. Goflow will route the full bundle from one profile.
           </p>
         </div>
       </section>
 
       {/* Grid */}
-      <main className="mx-auto max-w-6xl px-4 pb-24 pt-4 sm:px-6 lg:pr-[360px]">
+      <main className="mx-auto max-w-6xl px-4 pb-24 pt-4 sm:px-6">
         <div className="min-w-0">
           <div className="mb-5 rounded-2xl border border-border bg-card p-3 shadow-sm sm:hidden">
             <label className="relative block min-w-0">
@@ -213,7 +219,7 @@ export function CollectiveCatalog({ offers }: { offers: Offer[] }) {
               />
             </label>
           </div>
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {visibleOffers.map((offer, i) => (
               <OfferCard
                 key={offer.id}
@@ -233,11 +239,14 @@ export function CollectiveCatalog({ offers }: { offers: Offer[] }) {
               </p>
             </div>
           )}
-          <CartPanel
-            selectedOffers={selectedOffers}
-            onOpenCart={() => setCartOpen(true)}
-            onRemove={removeFromCart}
-          />
+          {requestsWidgetOpen && selectedOffers.length > 0 && (
+            <RequestsWidget
+              selectedOffers={selectedOffers}
+              onOpenCart={() => setCartOpen(true)}
+              onRemove={removeFromCart}
+              onClose={() => setRequestsWidgetOpen(false)}
+            />
+          )}
         </div>
       </main>
 
@@ -272,7 +281,10 @@ export function CollectiveCatalog({ offers }: { offers: Offer[] }) {
       <OfferModal
         offer={selected}
         onClose={close}
-        onAddToCart={addToCart}
+        onAddToCart={(offer) => {
+          addToCart(offer);
+          setRequestsWidgetOpen(true);
+        }}
         inCart={selected ? selectedIdSet.has(selected.id) : false}
       />
       <CartModal
@@ -351,7 +363,11 @@ function OfferCard({
         <button
           type="button"
           onClick={onToggleCart}
-          aria-label={inCart ? `Remove ${offer.fullName} from cart` : `Add ${offer.fullName} to cart`}
+          aria-label={
+            inCart
+              ? `Remove ${offer.fullName} from intro requests`
+              : `Add ${offer.fullName} to intro requests`
+          }
           className={`inline-flex min-w-11 items-center justify-center rounded-xl px-3 py-2.5 text-sm font-bold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring ${
             inCart
               ? "bg-success/10 text-success hover:bg-success/15"
@@ -365,68 +381,66 @@ function OfferCard({
   );
 }
 
-function CartPanel({
+function RequestsWidget({
   selectedOffers,
   onOpenCart,
   onRemove,
+  onClose,
 }: {
   selectedOffers: Offer[];
   onOpenCart: () => void;
   onRemove: (offerId: string) => void;
+  onClose: () => void;
 }) {
-  const slots = [0, 1, 2];
+  const visibleOffers = selectedOffers.slice(0, 3);
 
   return (
     <aside className="fixed right-6 top-20 z-30 hidden w-80 rounded-2xl border border-border bg-card p-4 shadow-xl shadow-primary/10 lg:block">
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-primary">
-            Request cart
+            Intro requests
           </p>
           <h2 className="mt-1 text-lg font-black tracking-tight">
             {selectedOffers.length} selected
           </h2>
         </div>
-        <div className="grid size-11 place-items-center rounded-xl bg-primary/10 text-primary">
-          <ShoppingBag className="size-5" />
-        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Hide intro requests"
+          className="grid size-9 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+        >
+          <X className="size-4" />
+        </button>
       </div>
       <p className="mt-3 text-sm leading-6 text-muted-foreground">
-        Add multiple programs and send one profile to Goflow for routing.
+        Review selected programs and send one profile to Goflow for routing.
       </p>
       <div className="mt-4 grid gap-2">
-        {slots.map((slot) => {
-          const offer = selectedOffers[slot];
-          return offer ? (
-            <div
-              key={offer.id}
-              className="flex min-h-16 items-center gap-3 rounded-xl border border-border bg-background p-2.5 shadow-sm"
-            >
+        {visibleOffers.map((offer) => (
+          <div
+            key={offer.id}
+            className="grid min-h-[76px] grid-cols-[34px_minmax(0,1fr)_32px] grid-rows-[auto_auto_auto] items-center gap-x-3 rounded-xl border border-border bg-background p-2.5 shadow-sm"
+          >
+            <div className="row-span-3">
               <BrandLogo offer={offer} size={34} />
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-bold">{offer.name}</p>
-                <p className="truncate text-xs text-muted-foreground">{offer.type}</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => onRemove(offer.id)}
-                aria-label={`Remove ${offer.fullName}`}
-                className="grid size-8 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              >
-                <X className="size-4" />
-              </button>
             </div>
-          ) : (
-            <div
-              key={slot}
-              className="flex min-h-16 items-center rounded-xl border border-dashed border-border bg-muted/35 px-3 text-sm text-muted-foreground"
+            <p className="truncate text-sm font-bold leading-tight">{offer.name}</p>
+            <button
+              type="button"
+              onClick={() => onRemove(offer.id)}
+              aria-label={`Remove ${offer.fullName}`}
+              className="row-span-3 grid size-8 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
-              {slot === 0
-                ? "Add programs from the marketplace grid."
-                : "Open slot"}
-            </div>
-          );
-        })}
+              <X className="size-4" />
+            </button>
+            <p className="truncate text-xs text-muted-foreground">{offer.type}</p>
+            <p className="truncate text-[11px] font-semibold text-primary">
+              Intro request
+            </p>
+          </div>
+        ))}
         {selectedOffers.length > 3 && (
           <p className="rounded-lg bg-primary/10 px-3 py-2 text-xs font-bold text-primary">
             +{selectedOffers.length - 3} more selected
@@ -439,7 +453,7 @@ function CartPanel({
         disabled={selectedOffers.length === 0}
         className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
       >
-        Review request <ChevronRight className="size-4" />
+        Review intro requests <ChevronRight className="size-4" />
       </button>
     </aside>
   );
@@ -478,7 +492,7 @@ function CartModal({
       className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-foreground/50 p-0 backdrop-blur-sm sm:p-6"
       role="dialog"
       aria-modal="true"
-      aria-label="Request cart"
+      aria-label="Intro requests"
       onClick={onClose}
     >
       <div
@@ -489,10 +503,10 @@ function CartModal({
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-primary">
-                Request cart
+                Intro requests
               </p>
               <h2 className="mt-2 text-2xl font-black tracking-tight">
-                Send your selected programs
+                Send your intro requests
               </h2>
               <p className="mt-2 text-sm leading-6 text-muted-foreground">
                 Goflow will use one profile to route the full bundle.

@@ -4,7 +4,6 @@ import { useEffect, type ReactNode } from "react";
 import { ArrowUpRight, Check, ShoppingBag, X } from "lucide-react";
 import type { Offer } from "@/lib/offers";
 import { BrandLogo } from "./BrandLogo";
-import { InterestForm } from "./InterestForm";
 
 export function OfferModal({
   offer,
@@ -34,35 +33,6 @@ export function OfferModal({
 
   if (!offer) return null;
   const currentOffer = offer;
-
-  const submitLabel =
-    offer.cta ??
-    (offer.id === "general"
-      ? "Send to Goflow"
-      : `Request intro to ${offer.name}`);
-
-  const requestType = offer.id === "general"
-    ? "general"
-    : offer.link
-      ? "join"
-      : offer.apply
-        ? "apply"
-        : "learn_more";
-  const panelTitle = offer.id === "general"
-    ? "Get in touch"
-    : offer.link
-      ? "Request community access"
-      : offer.apply
-        ? "Apply with Goflow"
-        : offer.cta
-          ? "Request an invite"
-          : "Request a warm intro";
-  const outboundUrl = offer.apply?.url || offer.link || null;
-  const outboundLabel = offer.apply
-    ? offer.apply.label ?? "Continue to partner application"
-    : offer.link
-      ? offer.cta ?? "Continue"
-      : undefined;
 
   function trackVisitSite() {
     fetch("/api/events", {
@@ -187,18 +157,19 @@ export function OfferModal({
           )}
         </div>
 
-        {/* Right: Goflow-owned application / learn-more form */}
+        {/* Right: add-only request action */}
         <div className="flex flex-col border-t border-border bg-muted/30 p-7 sm:p-9 md:border-l md:border-t-0">
-          <h3 className="text-lg font-bold tracking-tight">{panelTitle}</h3>
-          <p className="mb-2 text-[13px] text-muted-foreground">
-            Tell us about your brand first. Goflow captures the request, then
-            routes you to the right partner path when one is available.
+          <h3 className="text-lg font-bold tracking-tight">Add to intro requests</h3>
+          <p className="mt-2 text-[13px] leading-6 text-muted-foreground">
+            Add this program to your selected requests. You will fill out one
+            profile with phone, company, and store details when you review the
+            bundle.
           </p>
           {offer.id !== "general" && onAddToCart && (
             <button
               type="button"
               onClick={() => onAddToCart(offer)}
-              className={`mb-3 inline-flex w-full items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-bold transition-colors ${
+              className={`mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-bold transition-colors ${
                 inCart
                   ? "border-success/25 bg-success/10 text-success"
                   : "border-primary/20 bg-primary/10 text-primary hover:bg-primary/15"
@@ -206,24 +177,21 @@ export function OfferModal({
             >
               {inCart ? (
                 <>
-                  <Check className="size-4" /> Added to request cart
+                  <Check className="size-4" /> Added to intro requests
                 </>
               ) : (
                 <>
-                  <ShoppingBag className="size-4" /> Add to request cart
+                  <ShoppingBag className="size-4" /> Add to intro requests
                 </>
               )}
             </button>
           )}
-          <InterestForm
-            offerId={offer.id}
-            offerName={offer.fullName}
-            fields={offer.collect}
-            submitLabel={submitLabel}
-            requestType={requestType}
-            outboundUrl={outboundUrl}
-            outboundLabel={outboundLabel}
-          />
+          {offer.apply?.url && (
+            <p className="mt-3 rounded-xl border border-border bg-background p-3 text-xs leading-5 text-muted-foreground">
+              Partner application links unlock after Goflow captures the intro
+              request, so your team has the lead and routing context first.
+            </p>
+          )}
         </div>
       </div>
     </div>
