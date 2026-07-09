@@ -2,7 +2,7 @@ import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { createAdminClient, hasAdminKey } from "@/lib/supabase/admin";
 import { syncLead } from "@/lib/lead-sync";
-import { notifyByEmail } from "@/lib/notifications";
+import { notifyByEmail, sendLeadConfirmationEmail } from "@/lib/notifications";
 import {
   cleanEmail,
   cleanString,
@@ -94,6 +94,12 @@ export async function POST(request: Request) {
         Source: attribution.utm_source,
         Campaign: attribution.utm_campaign,
       },
+    });
+
+    await sendLeadConfirmationEmail({
+      name,
+      email,
+      company,
     });
 
     await syncLead({
