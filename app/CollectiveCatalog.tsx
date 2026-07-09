@@ -5,7 +5,6 @@ import {
   Check,
   ChevronRight,
   Minus,
-  Plus,
   Search,
   ShoppingBag,
   X,
@@ -352,7 +351,7 @@ function OfferCard({
           </span>
         ))}
       </div>
-      <div className="grid grid-cols-[1fr_auto] gap-2 pt-1">
+      <div className="grid grid-cols-2 gap-2 pt-1">
         <button
           type="button"
           onClick={onOpen}
@@ -374,7 +373,13 @@ function OfferCard({
               : "bg-primary text-primary-foreground hover:bg-primary/90"
           }`}
         >
-          {inCart ? <Check className="size-4" /> : <Plus className="size-4" />}
+          {inCart ? (
+            <>
+              <Check className="size-4" /> Added
+            </>
+          ) : (
+            "Request intro"
+          )}
         </button>
       </div>
     </article>
