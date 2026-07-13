@@ -4,7 +4,6 @@ import {
   CheckCircle2,
   LockKeyhole,
   Sparkles,
-  TrendingUp,
 } from "lucide-react";
 import { RegistrationForm } from "./RegistrationForm";
 
@@ -19,8 +18,8 @@ const channels = [
 
 const proof = [
   "Exclusive and invite-only marketplace paths",
-  "Potential program savings from $500K to $1M+",
-  "Warm Goflow introductions before partner handoff",
+  "Potential marketplace partner incentives for eligible brands",
+  "Goflow guidance before every partner handoff",
   "One profile for marketplace, retail, and global expansion",
 ];
 
@@ -31,12 +30,6 @@ const logos = [
   { name: "Macy's", src: "/logos/macys.ico" },
   { name: "Lowe's", src: "/logos/lowes.ico" },
   { name: "Temu", src: "/logos/temu.ico" },
-];
-
-const valueCards = [
-  ["$1M+", "Potential marketplace incentives and savings for eligible brands."],
-  ["$500K+", "Program-dependent savings opportunities surfaced behind access."],
-  ["Private paths", "Retail, international, and community programs not built for public browsing."],
 ];
 
 export default function Home() {
@@ -66,31 +59,16 @@ export default function Home() {
           <div>
             <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-border bg-card/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-primary backdrop-blur">
               <Sparkles className="size-3.5" />
-              Private marketplace access
+              Exclusive partner access
             </p>
             <h1 className="max-w-[13ch] text-5xl font-black leading-[0.98] tracking-tight text-balance sm:text-7xl">
-              Unlock the marketplace programs most brands never see.
+              Unlock the marketplace savings most brands never see.
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-muted-foreground">
-              Apply once to see curated retail, marketplace, international, and
-              partner programs Goflow can route for your brand, including
-              potential savings opportunities from $500K to $1M+ for eligible
-              sellers.
+              Apply once to see which exclusive marketplace partner incentives
+              you may qualify for through Goflow, including programs from
+              Amazon, Walmart, and more.
             </p>
-
-            <div className="mt-7 grid gap-3 sm:grid-cols-3">
-              {valueCards.map(([metric, body]) => (
-                <div key={metric} className="rounded-xl border border-border bg-card/80 p-4 shadow-sm">
-                  <div className="flex items-center gap-2 text-2xl font-black text-foreground">
-                    <TrendingUp className="size-5 text-primary" />
-                    {metric}
-                  </div>
-                  <p className="mt-2 text-xs font-medium leading-5 text-muted-foreground">
-                    {body}
-                  </p>
-                </div>
-              ))}
-            </div>
 
             <div className="mt-7 grid gap-3 sm:grid-cols-2">
               {proof.map((item) => (
@@ -131,8 +109,9 @@ export default function Home() {
                   See which programs your brand may qualify for.
                 </h2>
                 <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                  We use this profile to route your request, preserve source
-                  attribution, and follow up with the right partner path.
+                  Goflow reviews your profile, helps identify the right
+                  programs, and supports the application process before a
+                  partner handoff.
                 </p>
               </div>
             </div>
@@ -144,9 +123,9 @@ export default function Home() {
       <section className="border-y border-border bg-card/45">
         <div className="mx-auto grid max-w-6xl gap-6 px-6 py-10 md:grid-cols-3">
           {[
-            ["Discover", "Filter programs by channel, category, geography, and seller stage once inside the catalog."],
-            ["Apply", "Submit Goflow-owned program requests before any partner handoff or outbound application."],
-            ["Track", "Every access request, program application, and partner click is saved for follow-up."],
+            ["Share your profile", "Tell us about your brand, current channels, and growth goals in one short form."],
+            ["Review the right paths", "A Goflow team member reviews your fit and helps identify relevant partner programs."],
+            ["Apply with support", "We help guide the application process before making the appropriate partner introduction."],
           ].map(([title, body]) => (
             <div key={title}>
               <h3 className="text-base font-extrabold">{title}</h3>
@@ -160,17 +139,17 @@ export default function Home() {
         <div className="grid gap-4 md:grid-cols-[0.9fr_1.1fr] md:items-center">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">
-              Built as a lead magnet
+              Designed for growing brands
             </p>
             <h2 className="mt-2 text-3xl font-black tracking-tight">
-              The catalog stays valuable because the best paths are not public links.
+              The right marketplace path starts with the right fit.
             </h2>
           </div>
           <p className="text-sm leading-7 text-muted-foreground">
-            The page should convert because access has a concrete payoff:
-            eligible brands can uncover marketplace openings, retail partner
-            paths, and savings opportunities that are usually scattered across
-            partner portals, private forms, and manual introductions.
+            Goflow brings together the programs, incentives, and retail
+            expansion opportunities that are often managed through private
+            forms and partner introductions. Eligibility and savings vary by
+            program and brand.
           </p>
         </div>
         <div className="mt-7 flex flex-wrap gap-2">

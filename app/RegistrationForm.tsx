@@ -88,8 +88,9 @@ export function RegistrationForm() {
         </div>
         <h3 className="mt-4 text-xl font-extrabold">Access request saved</h3>
         <p className="mt-2 text-sm leading-6 text-muted-foreground">
-          We saved your profile for <b>{done}</b>. You can preview the Partner
-          Collective now while Goflow reviews the right partner paths for your brand.
+          We saved your profile for <b>{done}</b>. Goflow will review your
+          brand, help identify the relevant programs, and follow up before
+          making any partner introductions.
         </p>
         <Link
           href="/collective"
