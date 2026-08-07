@@ -1,4 +1,4 @@
-# Goflow Partner Collective
+# Goflow Growth Engine
 
 A public landing page and marketplace catalog of the retail & marketplace
 expansion programs Goflow can open for a brand. Visitors can browse the catalog
@@ -34,6 +34,10 @@ row-level-security policies (public can submit, only your team can read).
 | `COLLECTIVE_NOTIFY_EMAIL` | — | Where interest notifications go (default `sadya@goflow.com`) |
 | `RESEND_API_KEY` | — | Enables email notifications via [Resend](https://resend.com) |
 | `COLLECTIVE_NOTIFY_FROM` | — | From-address for notification emails |
+| `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` | — | Public Google reCAPTCHA v3 site key; activates invisible client verification when paired with the secret |
+| `RECAPTCHA_SECRET_KEY` | — | Server-only Google reCAPTCHA v3 secret; validates a fresh token before forms write data or trigger email |
+| `RECAPTCHA_ALLOWED_HOSTNAMES` | — | Comma-separated allowed domains (default: `goflowpartnercollective.com,www.goflowpartnercollective.com`) |
+| `RECAPTCHA_MIN_SCORE` | — | Minimum reCAPTCHA v3 score from 0 to 1 (default: `0.5`) |
 
 ## Editing the catalog
 

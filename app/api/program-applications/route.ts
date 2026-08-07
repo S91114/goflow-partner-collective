@@ -9,6 +9,7 @@ import {
 import { OFFERS, findOffer } from "@/lib/offers";
 import { syncLead } from "@/lib/lead-sync";
 import { notifyByEmail, sendLeadConfirmationEmail } from "@/lib/notifications";
+import { verifyRecaptcha } from "@/lib/recaptcha";
 import { createAdminClient, hasAdminKey } from "@/lib/supabase/admin";
 import {
   cleanDetails,
@@ -30,6 +31,18 @@ export async function POST(request: Request) {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
+  }
+
+  const recaptcha = await verifyRecaptcha({
+    token: cleanString(body.recaptchaToken, 4096),
+    action: "program_application",
+  });
+  if (!recaptcha.ok) {
+    console.warn("[collective] program application blocked by reCAPTCHA:", recaptcha.reason);
+    return NextResponse.json(
+      { error: "We couldn't verify this submission. Please try again." },
+      { status: 403 },
+    );
   }
 
   const offerId = cleanString(body.offerId, 80);
@@ -178,7 +191,7 @@ export async function POST(request: Request) {
     const internalSubject = `New ${offerName} request - ${company}`;
     const internalEmail = await notifyByEmail({
       subject: internalSubject,
-      title: "New Partner Collective program request",
+      title: "New Goflow Growth Engine program request",
       intro: `${name} from ${company} submitted a ${requestType.replace("_", " ")} request for ${offerName}.`,
       rows: {
         Email: email,

@@ -3,6 +3,7 @@
 import { useState, type FormEvent, type ReactNode } from "react";
 import { ArrowUpRight, Check, Loader2, Send } from "lucide-react";
 import type { CollectField } from "@/lib/offers";
+import { getRecaptchaToken } from "@/lib/recaptcha-client";
 
 const inputCls =
   "w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-[3px] focus:ring-primary/20";
@@ -51,11 +52,13 @@ export function InterestForm({
 
     setSubmitting(true);
     try {
+      const recaptchaToken = await getRecaptchaToken("program_application");
       const res = await fetch("/api/program-applications", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...payload,
+          recaptchaToken,
           requestType,
           attribution: {
             landing_path: `${window.location.pathname}${window.location.search}`,

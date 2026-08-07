@@ -2,13 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Goflow Partner Collective — brand tokens (from Goflow Brand Guidelines).
+/* Goflow — brand tokens (from Goflow Brand Guidelines).
    Indigo #5A6CFB · Navy #22354C · Sky #22A7F6 · Amber #FF9B00.
    All colors are HSL so Tailwind's hsl(var(--x)) mapping works. */
 @layer base {
   :root {
-    /* Cool off-white, biased toward the Goflow indigo */
-    --background: 222 32% 97.5%;
+    --background: 220 25% 98%;
     /* Goflow navy ink (#22354C) */
     --foreground: 213 38% 22%;
 
@@ -50,26 +49,6 @@
 }
 
 @layer components {
-  /* Soft indigo→sky brand mesh behind the hero — the one bold moment. */
-  .brand-mesh {
-    background:
-      radial-gradient(
-        62% 80% at 8% -20%,
-        hsl(var(--primary) / 0.18),
-        transparent 60%
-      ),
-      radial-gradient(
-        48% 70% at 96% -10%,
-        hsl(var(--sky) / 0.16),
-        transparent 55%
-      ),
-      radial-gradient(
-        40% 60% at 60% -30%,
-        hsl(var(--amber) / 0.07),
-        transparent 60%
-      );
-  }
-
   /* Per-store brand glow on card hover (brand color set inline via --brand). */
   .offer-card {
     transition:
@@ -83,20 +62,12 @@
       0 2px 6px rgba(15, 23, 42, 0.05);
   }
 
-  .card-in {
-    animation: cardIn 0.45s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  /* Every partner mark lives in the same quiet, color-aware tile. */
+  .brand-logo-tile {
+    border: 1px solid color-mix(in srgb, var(--logo-brand) 30%, hsl(var(--border)));
+    background: color-mix(in srgb, var(--logo-brand) 7%, white);
+    box-shadow: 0 5px 12px -8px color-mix(in srgb, var(--logo-brand) 68%, transparent);
   }
-  @keyframes cardIn {
-    from {
-      opacity: 0;
-      transform: translateY(12px);
-    }
-    to {
-      opacity: 1;
-      transform: none;
-    }
-  }
-
   .modal-in {
     animation: modalIn 0.28s cubic-bezier(0.2, 0.7, 0.3, 1) both;
   }
@@ -113,7 +84,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .card-in,
   .modal-in {
     animation: none;
   }

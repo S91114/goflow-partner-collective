@@ -1,5 +1,5 @@
 const NOTIFY_TO = process.env.COLLECTIVE_NOTIFY_EMAIL || "sadya@goflow.com";
-const DEFAULT_FROM = "Partner Collective <onboarding@resend.dev>";
+const DEFAULT_FROM = "Goflow Growth Engine <onboarding@resend.dev>";
 const SITE_URL =
   process.env.COLLECTIVE_SITE_URL || "https://goflowpartnercollective.com";
 
@@ -56,12 +56,12 @@ export async function sendLeadConfirmationEmail({
     ? "Your Goflow introduction requests are in"
     : program
       ? `We received your ${program} request`
-      : "Your Goflow Partner Collective request is in";
+      : "Your Goflow Growth Engine request is in";
   const preview = isBundle
     ? `Goflow received your introduction requests for ${company}.`
     : program
       ? `Goflow received your ${program} request for ${company}.`
-      : `Goflow received your Partner Collective access request for ${company}.`;
+      : `We received your Goflow Growth Engine request for ${company}.`;
   const heading = isBundle
     ? "Your introduction requests are in."
     : "We received your request.";
@@ -78,11 +78,11 @@ export async function sendLeadConfirmationEmail({
         <div style="max-width:620px;margin:0 auto;background:#ffffff;border:1px solid #dbe2ee;border-radius:16px;overflow:hidden">
           <div style="height:4px;background:#5a6cfb"></div>
           <div style="padding:28px">
-            <p style="margin:0 0 12px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:#5a6cfb">Goflow Partner Collective</p>
+            <p style="margin:0 0 12px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:#5a6cfb">Goflow Growth Engine</p>
             <h1 style="margin:0 0 14px;font-size:28px;line-height:1.12;color:#22354c">${escapeHtml(heading)}</h1>
             <p style="margin:0 0 16px;font-size:15px;line-height:1.7;color:#53647a">${introLine}</p>
             <p style="margin:0 0 18px;font-size:15px;line-height:1.7;color:#53647a">Eligible brands may uncover invite-only marketplace paths, warm Goflow introductions, and potential program savings from $500K to $1M+ depending on qualification and partner terms.</p>
-            <a href="${SITE_URL}/collective" style="display:inline-block;background:#5a6cfb;color:#ffffff;text-decoration:none;font-weight:700;border-radius:10px;padding:12px 18px;font-size:14px">Preview the catalog</a>
+            <a href="${SITE_URL}" style="display:inline-block;background:#5a6cfb;color:#ffffff;text-decoration:none;font-weight:700;border-radius:10px;padding:12px 18px;font-size:14px">Explore the Growth Engine</a>
             <p style="margin:22px 0 0;font-size:13px;line-height:1.6;color:#6b7a90">If anything in your profile needs to be corrected, reply to this email and the Goflow team will adjust it before making introductions.</p>
           </div>
         </div>

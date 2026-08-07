@@ -3,6 +3,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { ArrowRight, Check, Loader2, Send } from "lucide-react";
+import { getRecaptchaToken } from "@/lib/recaptcha-client";
 
 const inputCls =
   "w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-[3px] focus:ring-primary/20";
@@ -62,10 +63,11 @@ export function RegistrationForm() {
     };
 
     try {
+      const recaptchaToken = await getRecaptchaToken("registration");
       const res = await fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ ...payload, recaptchaToken }),
       });
       const json = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -93,7 +95,7 @@ export function RegistrationForm() {
           making any partner introductions.
         </p>
         <Link
-          href="/collective"
+          href="/"
           className="mt-5 inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary/90"
         >
           Preview the catalog <ArrowRight className="size-4" />

@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { Check, Loader2, Send } from "lucide-react";
+import { getRecaptchaToken } from "@/lib/recaptcha-client";
 
 export function LoginForm() {
   const [email, setEmail] = useState("");
@@ -14,10 +15,11 @@ export function LoginForm() {
     setSubmitting(true);
     setError(null);
     try {
+      const recaptchaToken = await getRecaptchaToken("login");
       const res = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, recaptchaToken }),
       });
       const json = await res.json().catch(() => ({}));
       if (!res.ok) {

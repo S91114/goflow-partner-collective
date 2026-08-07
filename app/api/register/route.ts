@@ -8,6 +8,7 @@ import {
 import { createAdminClient, hasAdminKey } from "@/lib/supabase/admin";
 import { syncLead } from "@/lib/lead-sync";
 import { notifyByEmail, sendLeadConfirmationEmail } from "@/lib/notifications";
+import { verifyRecaptcha } from "@/lib/recaptcha";
 import {
   cleanEmail,
   cleanString,
@@ -24,6 +25,18 @@ export async function POST(request: Request) {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
+  }
+
+  const recaptcha = await verifyRecaptcha({
+    token: cleanString(body.recaptchaToken, 4096),
+    action: "registration",
+  });
+  if (!recaptcha.ok) {
+    console.warn("[collective] registration blocked by reCAPTCHA:", recaptcha.reason);
+    return NextResponse.json(
+      { error: "We couldn't verify this submission. Please try again." },
+      { status: 403 },
+    );
   }
 
   const name = cleanString(body.name, 120);
@@ -119,10 +132,10 @@ export async function POST(request: Request) {
         : null;
     await updateCustomerRegistration(writeClient, customerId, registrationId);
 
-    const internalSubject = `New Partner Collective registration - ${company}`;
+    const internalSubject = `New Goflow Growth Engine registration - ${company}`;
     const internalEmail = await notifyByEmail({
       subject: internalSubject,
-      title: "New Partner Collective registration",
+      title: "New Goflow Growth Engine registration",
       intro: `${name} from ${company} requested access.`,
       rows: {
         Email: email,
@@ -148,7 +161,7 @@ export async function POST(request: Request) {
       });
     }
 
-    const leadSubject = "Your Goflow Partner Collective request is in";
+    const leadSubject = "Your Goflow Growth Engine request is in";
     const leadEmail = await sendLeadConfirmationEmail({
       name,
       email,

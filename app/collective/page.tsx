@@ -1,8 +1,12 @@
-import { OFFERS } from "@/lib/offers";
-import { CollectiveCatalog } from "../CollectiveCatalog";
+import { redirect } from "next/navigation";
 
-export const dynamic = "force-dynamic";
+export default async function CollectivePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ offer?: string | string[] }>;
+}) {
+  const { offer } = await searchParams;
+  const offerId = typeof offer === "string" ? offer : undefined;
 
-export default async function CollectivePage() {
-  return <CollectiveCatalog offers={OFFERS} />;
+  redirect(offerId ? `/?offer=${encodeURIComponent(offerId)}` : "/");
 }

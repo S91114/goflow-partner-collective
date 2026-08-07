@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import {
+  CalendarDays,
   Check,
   ChevronRight,
   Minus,
@@ -9,8 +9,9 @@ import {
   ShoppingBag,
   X,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { findOffer, type Offer } from "@/lib/offers";
+import { useCallback, useEffect, useMemo, useState, type CSSProperties } from "react";
+import { FILTERS, findOffer, type Offer } from "@/lib/offers";
+import { displayText } from "@/lib/display-text";
 import { BrandLogo } from "./BrandLogo";
 import { CartRequestForm } from "./CartRequestForm";
 import { OfferModal } from "./OfferModal";
@@ -34,6 +35,8 @@ const GENERAL_OFFER: Offer = {
   ],
 };
 
+const CATALOG_ORDER = ["Marketplaces", "Retail", "Services", "Events"];
+
 function resolve(id: string | null): Offer | null {
   if (id === "general") return GENERAL_OFFER;
   return findOffer(id) ?? null;
@@ -42,8 +45,10 @@ function resolve(id: string | null): Offer | null {
 export function CollectiveCatalog({ offers }: { offers: Offer[] }) {
   const [selected, setSelected] = useState<Offer | null>(null);
   const [query, setQuery] = useState("");
+  const [activeFilter, setActiveFilter] = useState("All");
   const [cartIds, setCartIds] = useState<string[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
+  const [requestSubmitted, setRequestSubmitted] = useState(false);
   const [requestsWidgetOpen, setRequestsWidgetOpen] = useState(false);
 
   // Open from ?offer= on first load (shareable links).
@@ -89,22 +94,29 @@ export function CollectiveCatalog({ offers }: { offers: Offer[] }) {
 
   const visibleOffers = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return offers;
-    return offers.filter((offer) =>
-      [
-        offer.name,
-        offer.fullName,
-        offer.type,
-        offer.description,
-        offer.whoItsFor,
-        ...offer.tags,
-        ...offer.filters,
-      ]
-        .join(" ")
-        .toLowerCase()
-        .includes(q),
-    );
-  }, [offers, query]);
+    return [...offers]
+      .filter((offer) => activeFilter === "All" || offer.filters.includes(activeFilter))
+      .filter((offer) => {
+        if (!q) return true;
+        return [
+          offer.name,
+          offer.fullName,
+          offer.type,
+          offer.description,
+          offer.whoItsFor,
+          ...offer.tags,
+          ...offer.filters,
+        ]
+          .join(" ")
+          .toLowerCase()
+          .includes(q);
+      })
+      .sort(
+        (a, b) =>
+          CATALOG_ORDER.indexOf(a.filters[0] ?? "Events") -
+          CATALOG_ORDER.indexOf(b.filters[0] ?? "Events"),
+      );
+  }, [activeFilter, offers, query]);
 
   const selectedOffers = useMemo(
     () => cartIds.map((id) => offers.find((offer) => offer.id === id)).filter(Boolean) as Offer[],
@@ -112,7 +124,6 @@ export function CollectiveCatalog({ offers }: { offers: Offer[] }) {
   );
 
   const selectedIdSet = useMemo(() => new Set(cartIds), [cartIds]);
-
   useEffect(() => {
     if (selectedOffers.length === 0) setRequestsWidgetOpen(false);
   }, [selectedOffers.length]);
@@ -122,6 +133,11 @@ export function CollectiveCatalog({ offers }: { offers: Offer[] }) {
     if (value.trim().length >= 2) {
       track("search_used", { query: value.trim().slice(0, 80) });
     }
+  }
+
+  function updateFilter(filter: string) {
+    setActiveFilter(filter);
+    track("filter_used", { filter });
   }
 
   function addToCart(offer: Offer) {
@@ -147,84 +163,109 @@ export function CollectiveCatalog({ offers }: { offers: Offer[] }) {
     }
   }
 
+  function closeCart() {
+    setCartOpen(false);
+    setRequestSubmitted(false);
+  }
+
+  function completeRequest() {
+    setCartIds([]);
+    setRequestsWidgetOpen(false);
+    setRequestSubmitted(true);
+  }
+
   return (
     <div className="min-h-screen overflow-x-hidden">
-      {/* Header */}
-      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
-          <div className="flex items-center gap-3">
+      <header className="sticky top-0 z-40 border-b border-border/80 bg-background/90 backdrop-blur-md">
+        <div className="mx-auto flex h-14 max-w-6xl items-center px-4 sm:px-6">
+          <div className="flex items-center">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/goflowlogo.svg" alt="Goflow" className="h-4 w-auto" />
-            <span className="hidden h-5 w-px bg-border sm:block" />
-            <span className="hidden text-sm font-medium text-muted-foreground sm:block">
-              Partner Collective
-            </span>
-          </div>
-          <div className="flex min-w-0 flex-1 items-center justify-end gap-2">
-            <label className="relative hidden w-full max-w-sm sm:block">
-              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-              <input
-                value={query}
-                onChange={(e) => updateQuery(e.target.value)}
-                placeholder="Search programs"
-                className="w-full rounded-lg border border-input bg-background py-2 pl-9 pr-3 text-sm outline-none transition focus:border-primary focus:ring-[3px] focus:ring-primary/20"
-              />
-            </label>
-            <button
-              type="button"
-              onClick={() => open(GENERAL_OFFER)}
-              className="shrink-0 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 sm:px-4"
-            >
-              <span className="hidden sm:inline">Talk to Goflow</span>
-              <span className="sm:hidden">Talk</span>
-            </button>
+            <img src="/goflowlogo.svg" alt="Goflow" className="h-5 w-auto" />
           </div>
         </div>
-        <div
-          className="absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-primary via-sky to-amber"
-          aria-hidden
-        />
       </header>
 
-      {/* Hero */}
-      <section className="relative overflow-hidden">
-        <div className="brand-mesh pointer-events-none absolute inset-0" aria-hidden />
-        <div className="relative mx-auto max-w-6xl px-4 pb-7 pt-16 sm:px-6">
-          <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-border bg-card/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-primary backdrop-blur">
-            <span className="size-1.5 rounded-full bg-primary" />
-            Retail &amp; marketplace programs
-          </p>
-          <h1 className="max-w-[18ch] text-4xl font-extrabold leading-[1.04] tracking-tight text-balance sm:text-[3rem]">
-            The Goflow Partner <span className="text-primary">Collective</span>
-          </h1>
-          <p className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
-            Browse partner programs, open details, and add the paths you want to
-            your introduction requests. Goflow will route the full bundle from
-            one profile.
-          </p>
+      <section className="border-b border-foreground/20 bg-foreground text-background">
+        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:px-6 sm:py-16 lg:grid-cols-[minmax(0,1.1fr)_minmax(23rem,0.9fr)] lg:gap-16">
+          <div>
+            <h1 className="text-5xl font-extrabold leading-none tracking-tight sm:text-6xl">
+              Goflow
+            </h1>
+            <p className="mt-4 text-xl font-medium leading-8 text-background/85 sm:text-2xl">
+              Removing friction so sellers can grow.
+            </p>
+            <p className="mt-6 max-w-xl text-[15px] leading-7 text-background/70 sm:text-base">
+              Choose every opportunity you want, add each one to your cart, then send one introduction request. Goflow routes the full group.
+            </p>
+          </div>
+          <ol className="grid content-start gap-0 border-t border-background/20 sm:grid-cols-3 lg:grid-cols-1 lg:border-l lg:border-t-0">
+            {[
+              ["01", "Choose", "Explore the partner programs that fit your next move."],
+              ["02", "Add", "Select every opportunity you want Goflow to review."],
+              ["03", "Send", "Complete one request for the full set of introductions."],
+            ].map(([number, title, description]) => (
+              <li key={number} className="border-b border-background/20 py-4 sm:border-b-0 sm:pr-4 sm:pt-5 lg:border-b lg:pl-6 lg:pr-0">
+                <p className="text-xs font-bold tracking-[0.16em] text-primary-foreground/55">{number}</p>
+                <h2 className="mt-1 text-base font-extrabold">{title}</h2>
+                <p className="mt-1.5 text-sm leading-5 text-background/65">{description}</p>
+              </li>
+            ))}
+          </ol>
         </div>
       </section>
 
-      {/* Grid */}
-      <main className="mx-auto max-w-6xl px-4 pb-24 pt-4 sm:px-6">
+      <main className="mx-auto max-w-6xl px-4 pb-24 pt-7 sm:px-6 sm:pt-9">
         <div className="min-w-0">
-          <div className="mb-5 rounded-2xl border border-border bg-card p-3 shadow-sm sm:hidden">
-            <label className="relative block min-w-0">
-              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <div className="mb-7 grid gap-5 border-b border-border pb-7 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+            <label className="relative block max-w-2xl">
+              <Search className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-muted-foreground" />
               <input
                 value={query}
                 onChange={(e) => updateQuery(e.target.value)}
-                placeholder="Search programs"
-                className="w-full rounded-lg border border-input bg-background py-2 pl-9 pr-3 text-sm outline-none transition focus:border-primary focus:ring-[3px] focus:ring-primary/20"
+                placeholder="Search programs or partners"
+                aria-label="Search programs"
+                className="w-full rounded-lg border border-input bg-card px-11 py-3.5 text-base shadow-sm outline-none transition placeholder:text-muted-foreground/80 focus:border-primary focus:ring-[4px] focus:ring-primary/15"
               />
+              {query && (
+                <button
+                  type="button"
+                  onClick={() => updateQuery("")}
+                  aria-label="Clear search"
+                  className="absolute right-3 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                >
+                  <X className="size-4" />
+                </button>
+              )}
             </label>
+            <div className="flex min-w-0 flex-wrap items-center gap-2" role="group" aria-label="Program type">
+              {FILTERS.map((filter) => {
+                const active = activeFilter === filter;
+                return (
+                  <button
+                    key={filter}
+                    type="button"
+                    aria-pressed={active}
+                    onClick={() => updateFilter(filter)}
+                    className={`shrink-0 rounded-full border px-3.5 py-2 text-sm font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring ${
+                      active
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-border bg-background text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                    }`}
+                  >
+                    {filter}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-sm font-medium text-muted-foreground" aria-live="polite">
+              {visibleOffers.length} results
+            </p>
           </div>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {visibleOffers.map((offer, i) => (
+          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {visibleOffers.map((offer) => (
               <OfferCard
                 key={offer.id}
                 offer={offer}
-                index={i}
                 inCart={selectedIdSet.has(offer.id)}
                 onOpen={() => open(offer)}
                 onToggleCart={() => toggleCart(offer)}
@@ -249,18 +290,6 @@ export function CollectiveCatalog({ offers }: { offers: Offer[] }) {
           )}
         </div>
       </main>
-
-      {/* Footer */}
-      <footer className="border-t border-border">
-        <div className="mx-auto flex max-w-6xl flex-col justify-between gap-3 px-4 py-8 text-xs text-muted-foreground sm:flex-row sm:items-center sm:px-6">
-          <span className="inline-flex w-fit items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 font-medium text-primary">
-            Goflow Partner Collective
-          </span>
-          <Link href="/" className="font-semibold text-primary">
-            Registration landing page
-          </Link>
-        </div>
-      </footer>
 
       {selectedOffers.length > 0 && (
         <button
@@ -290,9 +319,10 @@ export function CollectiveCatalog({ offers }: { offers: Offer[] }) {
       <CartModal
         open={cartOpen}
         selectedOffers={selectedOffers}
-        onClose={() => setCartOpen(false)}
+        submitted={requestSubmitted}
+        onClose={closeCart}
         onRemove={removeFromCart}
-        onDone={() => setCartIds([])}
+        onDone={completeRequest}
       />
     </div>
   );
@@ -300,13 +330,11 @@ export function CollectiveCatalog({ offers }: { offers: Offer[] }) {
 
 function OfferCard({
   offer,
-  index,
   inCart,
   onOpen,
   onToggleCart,
 }: {
   offer: Offer;
-  index: number;
   inCart: boolean;
   onOpen: () => void;
   onToggleCart: () => void;
@@ -316,27 +344,22 @@ function OfferCard({
       style={
         {
           "--brand": offer.brand,
-          animationDelay: `${index * 35}ms`,
-        } as React.CSSProperties
+        } as CSSProperties
       }
-      className={`offer-card card-in group relative flex min-h-[300px] flex-col gap-4 overflow-hidden rounded-2xl border bg-card p-5 text-left shadow-sm hover:-translate-y-1 ${
+      className={`offer-card group relative flex min-h-[326px] flex-col gap-4 overflow-hidden rounded-xl border bg-card p-5 pt-6 text-left shadow-sm hover:-translate-y-1 ${
         inCart ? "border-primary/45 ring-4 ring-primary/10" : "border-border"
       }`}
     >
-      <span
-        className="absolute inset-x-0 top-0 h-[3px]"
-        style={{ backgroundColor: offer.brand }}
-        aria-hidden
-      />
-      <div className="flex items-start justify-between gap-3">
-        <BrandLogo offer={offer} size={56} />
+      <div className="absolute inset-x-0 top-0 h-1" style={{ backgroundColor: offer.brand }} aria-hidden />
+      <div className="flex items-start">
+        <BrandLogo offer={offer} size={52} />
       </div>
       <div>
-        <h3 className="text-[19px] font-extrabold leading-tight tracking-tight text-balance">
-          {offer.fullName}
+        <h3 className="text-[19px] font-extrabold leading-tight tracking-tight text-balance text-foreground">
+          {displayText(offer.fullName)}
         </h3>
-        <p className="mt-1.5 text-[14px] leading-snug text-muted-foreground">
-          {offer.description}
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">
+          {displayText(offer.description)}
         </p>
       </div>
       <div className="mt-auto flex flex-wrap gap-1.5">
@@ -345,7 +368,7 @@ function OfferCard({
             key={t}
             className="rounded-md bg-muted px-2 py-0.5 text-[11.5px] font-medium text-muted-foreground"
           >
-            {t}
+            {displayText(t)}
           </span>
         ))}
       </div>
@@ -353,7 +376,7 @@ function OfferCard({
         <button
           type="button"
           onClick={onOpen}
-          className="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-background px-3 py-2.5 text-sm font-bold text-foreground transition-colors hover:bg-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+          className="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-background px-3 py-2.5 text-sm font-bold text-foreground transition-colors hover:bg-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
         >
           Details <ChevronRight className="size-4" />
         </button>
@@ -362,10 +385,10 @@ function OfferCard({
           onClick={onToggleCart}
           aria-label={
             inCart
-              ? `Remove ${offer.fullName} from introduction requests`
-              : `Add ${offer.fullName} to introduction requests`
+              ? `Remove ${displayText(offer.fullName)} from introduction requests`
+              : `Add ${displayText(offer.fullName)} to introduction requests`
           }
-          className={`inline-flex min-w-11 items-center justify-center rounded-xl px-3 py-2.5 text-sm font-bold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring ${
+          className={`inline-flex min-w-11 items-center justify-center rounded-lg px-3 py-2.5 text-sm font-bold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring ${
             inCart
               ? "bg-success/10 text-success hover:bg-success/15"
               : "bg-primary text-primary-foreground hover:bg-primary/90"
@@ -376,7 +399,7 @@ function OfferCard({
               <Check className="size-4" /> Added
             </>
           ) : (
-            "Request intro"
+            "Request introduction"
           )}
         </button>
       </div>
@@ -429,11 +452,11 @@ function RequestsWidget({
             <div className="row-span-3">
               <BrandLogo offer={offer} size={34} />
             </div>
-            <p className="truncate text-sm font-bold leading-tight">{offer.name}</p>
+            <p className="truncate text-sm font-bold leading-tight">{displayText(offer.name)}</p>
             <button
               type="button"
               onClick={() => onRemove(offer.id)}
-              aria-label={`Remove ${offer.fullName}`}
+              aria-label={`Remove ${displayText(offer.fullName)}`}
               className="row-span-3 grid size-8 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
               <X className="size-4" />
@@ -464,12 +487,14 @@ function RequestsWidget({
 function CartModal({
   open,
   selectedOffers,
+  submitted,
   onClose,
   onRemove,
   onDone,
 }: {
   open: boolean;
   selectedOffers: Offer[];
+  submitted: boolean;
   onClose: () => void;
   onRemove: (offerId: string) => void;
   onDone: () => void;
@@ -501,57 +526,83 @@ function CartModal({
         onClick={(e) => e.stopPropagation()}
         className="modal-in flex min-h-full w-full max-w-4xl flex-col overflow-hidden bg-background shadow-2xl sm:min-h-0 sm:max-h-[90vh] sm:rounded-3xl md:grid md:grid-cols-[0.9fr_1.1fr]"
       >
-        <div className="flex flex-col gap-4 border-b border-border bg-card p-6 md:border-b-0 md:border-r">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-primary">
-                Introduction requests
-              </p>
-              <h2 className="mt-2 text-2xl font-black tracking-tight">
-                Send your introduction requests
-              </h2>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                You are one form away from getting a bundle of introductions.
-                Goflow will use one profile to route the full bundle.
-              </p>
+        {submitted ? (
+          <div className="flex min-h-[26rem] w-full flex-col items-center justify-center p-8 text-center md:col-span-2 sm:p-12">
+            <div className="grid size-14 place-items-center rounded-full bg-success/10 text-success">
+              <Check className="size-7" strokeWidth={2.5} />
             </div>
+            <h2 className="mt-5 text-3xl font-black tracking-tight">Thank you.</h2>
+            <p className="mt-3 max-w-sm text-[15px] leading-7 text-muted-foreground">
+              Someone will be in touch with you shortly.
+            </p>
+            <p className="mt-1 max-w-sm text-sm leading-6 text-muted-foreground">
+              Want to connect sooner? Book time with the Goflow team.
+            </p>
+            <a
+              href="https://goflow.us/book"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-6 inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary/90"
+            >
+              Book a time with Goflow <CalendarDays className="size-4" />
+            </a>
             <button
               type="button"
               onClick={onClose}
-              aria-label="Close"
-              className="grid size-9 place-items-center rounded-lg border border-border bg-background text-muted-foreground transition-colors hover:text-foreground"
+              className="mt-4 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground"
             >
-              <X className="size-4" />
+              Keep exploring
             </button>
           </div>
-          <div className="flex flex-col gap-2 overflow-y-auto">
-            {selectedOffers.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-border bg-muted/40 p-4 text-sm text-muted-foreground">
-                No programs selected yet.
-              </div>
-            ) : (
-              selectedOffers.map((offer) => (
-                <div key={offer.id} className="flex items-center gap-3 rounded-xl border border-border bg-background p-3">
-                  <BrandLogo offer={offer} size={38} />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-bold">{offer.fullName}</p>
-                    <p className="truncate text-xs text-muted-foreground">{offer.tags.slice(0, 2).join(" · ")}</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => onRemove(offer.id)}
-                    className="inline-flex items-center gap-1 rounded-lg bg-muted px-2.5 py-2 text-xs font-bold text-muted-foreground transition-colors hover:text-foreground"
-                  >
-                    <Minus className="size-3.5" /> Remove
-                  </button>
+        ) : (
+          <>
+            <div className="flex flex-col gap-4 border-b border-border bg-card p-6 md:border-b-0 md:border-r">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-primary">
+                    Introduction requests
+                  </p>
+                  <h2 className="mt-2 text-2xl font-black tracking-tight">
+                    Send your introduction requests
+                  </h2>
+                  <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                    You are one form away from getting a bundle of introductions.
+                    Goflow will use one profile to route the full bundle.
+                  </p>
                 </div>
-              ))
-            )}
-          </div>
-        </div>
-        <div className="overflow-y-auto p-6">
-          <CartRequestForm selectedOffers={selectedOffers} onDone={onDone} />
-        </div>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  aria-label="Close"
+                  className="grid size-9 place-items-center rounded-lg border border-border bg-background text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  <X className="size-4" />
+                </button>
+              </div>
+              <div className="flex flex-col gap-2 overflow-y-auto">
+                {selectedOffers.map((offer) => (
+                  <div key={offer.id} className="flex items-center gap-3 rounded-xl border border-border bg-background p-3">
+                    <BrandLogo offer={offer} size={38} />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-bold">{displayText(offer.fullName)}</p>
+                      <p className="truncate text-xs text-muted-foreground">{offer.tags.slice(0, 2).map(displayText).join(" · ")}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => onRemove(offer.id)}
+                      className="inline-flex items-center gap-1 rounded-lg bg-muted px-2.5 py-2 text-xs font-bold text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      <Minus className="size-3.5" /> Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="overflow-y-auto p-6">
+              <CartRequestForm selectedOffers={selectedOffers} onDone={onDone} />
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

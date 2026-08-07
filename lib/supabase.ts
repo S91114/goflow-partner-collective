@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 
-// Supabase client for the Partner Collective (server-side use in the leads API).
+// Supabase client for the Goflow Growth Engine (server-side use in the leads API).
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 

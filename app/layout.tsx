@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import { RecaptchaScript } from "./RecaptchaScript";
 
 // Inter — self-hosted, licensed-safe stand-in for Goflow's Euclid Circular A.
 const inter = localFont({
@@ -16,9 +17,8 @@ const inter = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Goflow Partner Collective",
-  description:
-    "Browse the marketplace and retail expansion programs Goflow can open for your brand — and request a warm intro.",
+  title: "Goflow",
+  description: "Removing friction so sellers can grow.",
 };
 
 export default function RootLayout({
@@ -26,7 +26,10 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={inter.variable}>
-      <body>{children}</body>
+      <body>
+        <RecaptchaScript />
+        {children}
+      </body>
     </html>
   );
 }

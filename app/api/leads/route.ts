@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { notifyByEmail } from "@/lib/notifications";
+import { verifyRecaptcha } from "@/lib/recaptcha";
 import { createAdminClient } from "@/lib/supabase/admin";
 import {
   cleanDetails,
@@ -12,6 +13,7 @@ import {
 export const runtime = "nodejs";
 
 type LeadPayload = {
+  recaptchaToken?: string;
   offerId?: string;
   offerName?: string;
   name?: string;
@@ -27,6 +29,18 @@ export async function POST(request: Request) {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
+  }
+
+  const recaptcha = await verifyRecaptcha({
+    token: cleanString(body.recaptchaToken, 4096),
+    action: "lead_interest",
+  });
+  if (!recaptcha.ok) {
+    console.warn("[collective] lead blocked by reCAPTCHA:", recaptcha.reason);
+    return NextResponse.json(
+      { error: "We couldn't verify this submission. Please try again." },
+      { status: 403 },
+    );
   }
 
   const offerId = cleanString(body.offerId, 80);
@@ -82,7 +96,7 @@ export async function POST(request: Request) {
   // key is configured, so the form works with or without it.
   await notifyByEmail({
     subject: `New interest: ${offerName} - ${company}`,
-    title: "New Partner Collective lead",
+    title: "New Goflow Growth Engine lead",
     intro: `${name} from ${company} is interested in ${offerName}.`,
     rows: {
       Email: email,

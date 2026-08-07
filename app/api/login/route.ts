@@ -1,11 +1,24 @@
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
-import { cleanEmail, EMAIL_RE } from "@/lib/validation";
+import { verifyRecaptcha } from "@/lib/recaptcha";
+import { cleanEmail, cleanString, EMAIL_RE } from "@/lib/validation";
 
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
   const body = await request.json().catch(() => ({}));
+  const recaptcha = await verifyRecaptcha({
+    token: cleanString(body.recaptchaToken, 4096),
+    action: "login",
+  });
+  if (!recaptcha.ok) {
+    console.warn("[collective] login blocked by reCAPTCHA:", recaptcha.reason);
+    return NextResponse.json(
+      { error: "We couldn't verify this login request. Please try again." },
+      { status: 403 },
+    );
+  }
+
   const email = cleanEmail(body.email);
   if (!EMAIL_RE.test(email)) {
     return NextResponse.json(
@@ -31,7 +44,7 @@ export async function POST(request: Request) {
     email,
     options: {
       shouldCreateUser: false,
-      emailRedirectTo: `${origin}/auth/callback?next=/collective`,
+      emailRedirectTo: `${origin}/auth/callback?next=/`,
     },
   });
 

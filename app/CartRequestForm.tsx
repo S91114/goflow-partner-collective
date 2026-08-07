@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, type FormEvent, type ReactNode } from "react";
-import { Check, Loader2, Send } from "lucide-react";
+import { Loader2, Send } from "lucide-react";
 import type { Offer } from "@/lib/offers";
+import { getRecaptchaToken } from "@/lib/recaptcha-client";
 
 const inputCls =
   "w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-[3px] focus:ring-primary/20";
@@ -15,7 +16,6 @@ export function CartRequestForm({
   onDone: () => void;
 }) {
   const [submitting, setSubmitting] = useState(false);
-  const [done, setDone] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
@@ -26,7 +26,7 @@ export function CartRequestForm({
 
     const payload = {
       offerId: "general",
-      offerName: "Partner Collective Introduction Bundle",
+      offerName: "Goflow Growth Engine Introduction Bundle",
       requestType: "general",
       selectedPrograms: selectedOffers.map((offer) => ({
         offerId: offer.id,
@@ -40,7 +40,6 @@ export function CartRequestForm({
         "Selected programs": selectedProgramNames.join("; "),
         "Program count": String(selectedOffers.length),
         Phone: String(data.get("phone") || "").trim(),
-        WhatsApp: String(data.get("whatsapp") || "").trim(),
         "Amazon store": String(data.get("amazonStore") || "").trim(),
         "Priority or notes": String(data.get("notes") || "").trim(),
       },
@@ -52,40 +51,23 @@ export function CartRequestForm({
 
     setSubmitting(true);
     try {
+      const recaptchaToken = await getRecaptchaToken("program_application");
       const res = await fetch("/api/program-applications", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ ...payload, recaptchaToken }),
       });
       const json = await res.json().catch(() => ({}));
       if (!res.ok) {
         setError(json.error || "We couldn't submit these requests yet.");
         return;
       }
-      setDone(payload.name.split(" ")[0] || "there");
       onDone();
     } catch {
       setError("Network error. Please try again.");
     } finally {
       setSubmitting(false);
     }
-  }
-
-  if (done) {
-    return (
-      <div className="rounded-2xl border border-border bg-muted/50 p-6 text-center">
-        <div className="mx-auto grid size-12 place-items-center rounded-full bg-success/10 text-success">
-          <Check className="size-6" />
-        </div>
-        <h3 className="mt-4 text-xl font-extrabold">
-          Introduction requests sent
-        </h3>
-        <p className="mt-2 text-sm leading-6 text-muted-foreground">
-          Thanks, {done}. Goflow received your selected programs and will route
-          the right partner path from here.
-        </p>
-      </div>
-    );
   }
 
   return (
@@ -128,15 +110,6 @@ export function CartRequestForm({
           required
           autoComplete="tel"
           placeholder="+1 555 123 4567"
-          className={inputCls}
-        />
-      </Field>
-      <Field label="WhatsApp number">
-        <input
-          name="whatsapp"
-          type="tel"
-          autoComplete="tel"
-          placeholder="If different from phone"
           className={inputCls}
         />
       </Field>

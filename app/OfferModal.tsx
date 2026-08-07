@@ -3,6 +3,7 @@
 import { useEffect, type ReactNode } from "react";
 import { ArrowUpRight, Check, ShoppingBag, X } from "lucide-react";
 import type { Offer } from "@/lib/offers";
+import { displayText } from "@/lib/display-text";
 import { BrandLogo } from "./BrandLogo";
 
 export function OfferModal({
@@ -56,7 +57,7 @@ export function OfferModal({
       onClick={onClose}
       role="dialog"
       aria-modal="true"
-      aria-label={offer.fullName}
+      aria-label={displayText(offer.fullName)}
     >
       <div
         onClick={(e) => e.stopPropagation()}
@@ -76,20 +77,19 @@ export function OfferModal({
           <X className="size-4" />
         </button>
 
-        {/* Left: offer detail */}
         <div
           className="flex flex-col gap-6 overflow-y-auto p-7 sm:p-9"
           style={{
-            background: `linear-gradient(180deg, color-mix(in srgb, ${offer.brand} 8%, transparent), transparent 220px)`,
+            backgroundColor: `color-mix(in srgb, ${offer.brand} 5%, hsl(var(--background)))`,
           }}
         >
           <div>
             <BrandLogo offer={offer} size={68} />
             <h2 className="mt-3 text-3xl font-extrabold leading-[1.1] tracking-tight text-balance">
-              {offer.fullName}
+              {displayText(offer.fullName)}
             </h2>
             <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground">
-              {offer.description}
+              {displayText(offer.description)}
             </p>
             {offer.website && (
               <a
@@ -106,7 +106,7 @@ export function OfferModal({
 
           {offer.whoItsFor && (
             <Section label="Who it's for">
-              <p className="text-sm text-muted-foreground">{offer.whoItsFor}</p>
+              <p className="text-sm text-muted-foreground">{displayText(offer.whoItsFor)}</p>
             </Section>
           )}
 
@@ -118,7 +118,7 @@ export function OfferModal({
                     key={t}
                     className="rounded-md bg-muted px-2 py-0.5 text-[11.5px] font-medium text-muted-foreground"
                   >
-                    {t}
+                    {displayText(t)}
                   </span>
                 ))}
               </div>
@@ -131,7 +131,7 @@ export function OfferModal({
                 {offer.requirements.map((r) => (
                   <li key={r} className="flex items-start gap-2.5 text-sm text-muted-foreground">
                     <Check className="mt-0.5 size-4 flex-none text-success" />
-                    {r}
+                    {displayText(r)}
                   </li>
                 ))}
               </ul>
@@ -146,7 +146,7 @@ export function OfferModal({
                     <span className="grid size-6 flex-none place-items-center rounded-md bg-primary/10 text-xs font-bold text-primary tabular-nums">
                       {i + 1}
                     </span>
-                    {step}
+                    {displayText(step)}
                   </li>
                 ))}
               </ol>
