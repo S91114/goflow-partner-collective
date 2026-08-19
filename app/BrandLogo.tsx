@@ -51,15 +51,18 @@ export function BrandLogo({
   const tileStyle = { "--logo-brand": offer.brand } as CSSProperties;
   const paired = offer.logoLayout === "paired" && Boolean(offer.secondaryLogo) && size >= 50;
   const wordmark = offer.logoLayout === "wordmark" && size >= 50;
-  const wide = offer.logoLayout === "wide" || wordmark;
+  const ultraWide = offer.logoLayout === "ultraWide" && size >= 50;
+  const wide = offer.logoLayout === "wide" || wordmark || ultraWide;
   const width = paired
     ? size * 2 + 8
+    : ultraWide
+    ? Math.round(size * 4.15)
     : wordmark
     ? Math.round(size * 3.2)
     : wide
       ? Math.round(size * 2.35)
       : size;
-  const height = wordmark ? Math.round(size * 0.55) : size;
+  const height = size;
   const logoStyle = offer.logoTone
     ? { filter: LOGO_FILTERS[offer.logoTone] }
     : undefined;

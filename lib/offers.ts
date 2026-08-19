@@ -22,7 +22,7 @@ export type Offer = {
   /** Optional second mark for co-branded offers. */
   secondaryLogo?: string;
   /** Wider frame for horizontal wordmarks. */
-  logoLayout?: "wide" | "wordmark" | "paired";
+  logoLayout?: "wide" | "wordmark" | "ultraWide" | "paired";
   /** Color treatment for a monochrome bundled mark. */
   logoTone?: "target" | "macys" | "newegg" | "aliexpress";
   /** Lucide mark for Goflow-owned offers without an external brand logo. */
@@ -139,6 +139,31 @@ function retailOpportunity({
 }
 
 export const OFFERS: Offer[] = [
+  {
+    id: "jcpenney-commission-offer",
+    name: "JCPenney",
+    fullName: "JCPenney Commission Rate Offer",
+    logo: "/logos/jcpenney.svg",
+    logoLayout: "wordmark",
+    brand: "#CC0102",
+    type: "Marketplace exclusive",
+    filters: ["Marketplaces"],
+    tags: ["Goflow exclusive", "2% through September", "1% in October"],
+    description:
+      "Get 2% off applicable JCPenney marketplace commission rates through September. Eligible sellers get 1% off in October.",
+    whoItsFor: "Goflow customers not already live on JCPenney",
+    requirements: [
+      "An active Goflow account",
+      "Not live on JCPenney when the request is submitted",
+      "JCPenney eligibility and category requirements apply",
+    ],
+    process: [
+      "Add JCPenney to your introduction requests.",
+      "Goflow confirms your eligibility and shares the right details.",
+      "JCPenney reviews your marketplace opportunity.",
+    ],
+    collect: [],
+  },
   {
     id: "amazon-mcf-tiktok",
     website:
@@ -720,7 +745,7 @@ export const OFFERS: Offer[] = [
     name: "Hobby Lobby",
     website: "https://www.hobbylobby.com/",
     logo: "/logos/hobby-lobby.svg",
-    logoLayout: "wordmark",
+    logoLayout: "ultraWide",
     tags: ["Crafts", "Home", "Seasonal"],
     brand: "#CF1F2F",
     description:
