@@ -92,6 +92,18 @@ export function CollectiveCatalog({ offers }: { offers: Offer[] }) {
     window.history.replaceState(null, "", url);
   }, []);
 
+  const openApplication = useCallback(
+    (offer: Offer) => {
+      open(offer);
+      track(
+        "partner_apply_click",
+        { application: offer.apply?.url ?? "", surface: "catalog_card" },
+        offer,
+      );
+    },
+    [open, track],
+  );
+
   const visibleOffers = useMemo(() => {
     const q = query.trim().toLowerCase();
     return [...offers]
@@ -195,14 +207,14 @@ export function CollectiveCatalog({ offers }: { offers: Offer[] }) {
               Removing friction so sellers can grow.
             </p>
             <p className="mt-6 max-w-xl text-[15px] leading-7 text-background/70 sm:text-base">
-              Choose every opportunity you want, add each one to your cart, then send one introduction request. Goflow routes the full group.
+              Explore every opportunity. Apply directly where an application is available, or send one profile for the introductions you want.
             </p>
           </div>
           <ol className="grid content-start gap-0 border-t border-background/20 sm:grid-cols-3 lg:grid-cols-1 lg:border-l lg:border-t-0">
             {[
-              ["01", "Choose", "Explore the partner programs that fit your next move."],
-              ["02", "Add", "Select every opportunity you want Goflow to review."],
-              ["03", "Send", "Complete one request for the full set of introductions."],
+              ["01", "Explore", "Find the marketplaces, services, and programs for your next move."],
+              ["02", "Apply", "Apply directly inside Goflow whenever an application is available."],
+              ["03", "Connect", "Goflow will be in touch after you submit."],
             ].map(([number, title, description]) => (
               <li key={number} className="border-b border-background/20 py-4 sm:border-b-0 sm:pr-4 sm:pt-5 lg:border-b lg:pl-6 lg:pr-0">
                 <p className="text-xs font-bold tracking-[0.16em] text-primary-foreground/55">{number}</p>
@@ -268,6 +280,7 @@ export function CollectiveCatalog({ offers }: { offers: Offer[] }) {
                 offer={offer}
                 inCart={selectedIdSet.has(offer.id)}
                 onOpen={() => open(offer)}
+                onApply={() => openApplication(offer)}
                 onToggleCart={() => toggleCart(offer)}
               />
             ))}
@@ -332,13 +345,17 @@ function OfferCard({
   offer,
   inCart,
   onOpen,
+  onApply,
   onToggleCart,
 }: {
   offer: Offer;
   inCart: boolean;
   onOpen: () => void;
+  onApply: () => void;
   onToggleCart: () => void;
 }) {
+  const hasDirectApplication = Boolean(offer.apply);
+
   return (
     <article
       style={
@@ -382,19 +399,23 @@ function OfferCard({
         </button>
         <button
           type="button"
-          onClick={onToggleCart}
+          onClick={hasDirectApplication ? onApply : onToggleCart}
           aria-label={
-            inCart
+            hasDirectApplication
+              ? `Apply for ${displayText(offer.fullName)}`
+              : inCart
               ? `Remove ${displayText(offer.fullName)} from introduction requests`
               : `Add ${displayText(offer.fullName)} to introduction requests`
           }
           className={`inline-flex min-w-11 items-center justify-center rounded-lg px-3 py-2.5 text-sm font-bold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring ${
-            inCart
+            !hasDirectApplication && inCart
               ? "bg-success/10 text-success hover:bg-success/15"
               : "bg-primary text-primary-foreground hover:bg-primary/90"
           }`}
         >
-          {inCart ? (
+          {hasDirectApplication ? (
+            "Apply here"
+          ) : inCart ? (
             <>
               <Check className="size-4" /> Added
             </>
