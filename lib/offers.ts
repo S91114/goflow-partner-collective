@@ -53,8 +53,8 @@ export type Offer = {
   link?: string;
   /** Informational site shown as a "Visit site" link. */
   website?: string;
-  /** Verified external application, available after the program is added to requests. */
-  apply?: { url: string; label?: string };
+  /** Verified external application. */
+  apply?: { url: string; label?: string; embed?: boolean };
 };
 
 export const FILTERS = [
@@ -466,6 +466,7 @@ export const OFFERS: Offer[] = [
     apply: {
       url: "https://global-selling.mercadolibre.com/landing/about",
       label: "Apply here directly",
+      embed: false,
     },
     name: "Mercado Libre",
     fullName: "Mercado Libre Global Selling",
@@ -654,6 +655,7 @@ export const OFFERS: Offer[] = [
     apply: {
       url: "https://ps.goflow.com/sadya-core",
       label: "Sign up for Goflow Core",
+      embed: false,
     },
     name: "Goflow Core",
     fullName: "Goflow Core",
