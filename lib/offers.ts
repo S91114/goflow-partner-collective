@@ -53,8 +53,8 @@ export type Offer = {
   link?: string;
   /** Informational site shown as a "Visit site" link. */
   website?: string;
-  /** Application. When embed=true the form renders in an iframe; else a link-out button. */
-  apply?: { url: string; embed?: boolean; label?: string };
+  /** Verified external application, available after the program is added to requests. */
+  apply?: { url: string; label?: string };
 };
 
 export const FILTERS = [
@@ -146,6 +146,10 @@ export const OFFERS: Offer[] = [
     logo: "/logos/jcpenney.svg",
     logoLayout: "wordmark",
     brand: "#CC0102",
+    apply: {
+      url: "https://forms.cloud.microsoft/pages/responsepage.aspx?id=oUoHsHSyjkaz937ZD_J62_AU77UpDSZOlVg0H3WT-35UNjNFVlE3MVE4TFc5MFc2UUlTNERKRUtRVi4u&route=shorturl",
+      label: "Apply here directly",
+    },
     type: "Marketplace exclusive",
     filters: ["Marketplaces"],
     tags: ["Goflow exclusive", "2% through September", "1% in October"],
@@ -256,7 +260,7 @@ export const OFFERS: Offer[] = [
       "https://marketplace.walmart.com/nss-cp/?utm_source=goflow&utm_medium=channelpartner&utm_campaign=40235183-fy27-us-mp-cp-gfl-nss-nss",
     apply: {
       url: "https://marketplace.walmart.com/nss-cp/?utm_source=goflow&utm_medium=channelpartner&utm_campaign=40235183-fy27-us-mp-cp-gfl-nss-nss",
-      label: "Apply — up to $75K in savings",
+      label: "Apply here directly",
     },
     name: "Walmart NSS",
     fullName: "Walmart New Seller Savings",
@@ -374,7 +378,7 @@ export const OFFERS: Offer[] = [
     website: "https://marketplace.macys.com",
     apply: {
       url: "https://share.hsforms.com/1UQ5If8SlQlOnZDFuVfcEAA4cwyj",
-      embed: true,
+      label: "Apply here directly",
     },
     name: "Macy's Marketplace",
     fullName: "Macy's Marketplace",
@@ -398,8 +402,8 @@ export const OFFERS: Offer[] = [
     id: "nordstrom",
     website: "https://www.nordstrom.com",
     apply: {
-      url: "https://share.hsforms.com/1UQ5If8SlQlOnZDFuVfcEAA4cwyj",
-      embed: true,
+      url: "https://share.hsforms.com/1APbMcrL5S1KhNZl09fmFTA4cwyj",
+      label: "Apply here directly",
     },
     name: "Nordstrom Marketplace",
     fullName: "Nordstrom Marketplace",
@@ -454,6 +458,34 @@ export const OFFERS: Offer[] = [
     collect: [
       CATEGORY_FIELD(),
       { name: "regions", label: "Target regions", type: "text" },
+    ],
+  },
+  {
+    id: "mercado-libre",
+    website: "https://global-selling.mercadolibre.com/landing/about",
+    apply: {
+      url: "https://global-selling.mercadolibre.com/landing/about",
+      label: "Apply here directly",
+    },
+    name: "Mercado Libre",
+    fullName: "Mercado Libre Global Selling",
+    logo: "/logos/mercado-libre.png",
+    logoLayout: "wide",
+    brand: "#FFE600",
+    type: "Marketplace",
+    filters: ["Marketplaces"],
+    tags: ["Latin America", "Cross border", "Global Selling"],
+    description:
+      "Sell across Mercado Libre marketplaces in Mexico, Brazil, Chile, Colombia, and Argentina with one Global Selling account.",
+    whoItsFor: "Brands ready to grow in Latin America",
+    requirements: [],
+    process: [
+      "Add Mercado Libre to your requests.",
+      "Goflow reviews your catalog, target countries, and cross border readiness.",
+      "Submit your request, then apply directly to Global Selling with Goflow support.",
+    ],
+    collect: [
+      { name: "regions", label: "Target Latin American markets", type: "text" },
     ],
   },
   {
@@ -615,6 +647,30 @@ export const OFFERS: Offer[] = [
         type: "text",
       },
     ],
+  },
+  {
+    id: "goflow-core",
+    website: "https://ps.goflow.com/sadya-core",
+    apply: {
+      url: "https://ps.goflow.com/sadya-core",
+      label: "Sign up for Goflow Core",
+    },
+    name: "Goflow Core",
+    fullName: "Goflow Core",
+    icon: "network",
+    brand: "#536DFE",
+    type: "Goflow Service",
+    filters: ["Services"],
+    tags: ["Operations", "Multichannel", "Growth"],
+    description:
+      "Start with Goflow Core and bring the work behind your growth channels into one platform.",
+    whoItsFor: "Brands ready for a more connected operating foundation",
+    requirements: [],
+    process: [
+      "Add Goflow Core to your requests.",
+      "Submit your request, then apply directly with Goflow support.",
+    ],
+    collect: [],
   },
   {
     id: "goflow-capital",

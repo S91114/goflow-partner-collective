@@ -51,6 +51,22 @@ export function OfferModal({
     }).catch(() => {});
   }
 
+  function trackPartnerApply() {
+    fetch("/api/events", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        eventType: "partner_apply_click",
+        offerId: currentOffer.id,
+        metadata: { application: currentOffer.apply?.url ?? "" },
+        attribution: {
+          landing_path: `${window.location.pathname}${window.location.search}`,
+          referrer: document.referrer,
+        },
+      }),
+    }).catch(() => {});
+  }
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-foreground/50 p-0 backdrop-blur-sm sm:p-6"
@@ -154,14 +170,15 @@ export function OfferModal({
           )}
         </div>
 
-        {/* Right: add-only request action */}
+        {/* Right: the request is collected before a direct partner application opens. */}
         <div className="flex flex-col border-t border-border bg-muted/30 p-7 sm:p-9 md:border-l md:border-t-0">
           <h3 className="text-lg font-bold tracking-tight">
-            Add to introduction requests
+            {offer.apply ? "Apply here directly" : "Request an introduction"}
           </h3>
           <p className="mt-2 text-[13px] leading-6 text-muted-foreground">
-            You are one form away from getting a bundle of introductions. Add
-            this program, then submit one profile for Goflow to route.
+            {offer.apply
+              ? "Add this program to your requests. When you submit the full request, Goflow gets your details and can send them to the partner."
+              : "You are one form away from getting a bundle of introductions. Add this program, then submit one profile for Goflow to route."}
           </p>
           {offer.id !== "general" && onAddToCart && (
             <button
@@ -183,6 +200,18 @@ export function OfferModal({
                 </>
               )}
             </button>
+          )}
+          {offer.apply && inCart && (
+            <a
+              href={offer.apply.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={trackPartnerApply}
+              className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary/90"
+            >
+              {displayText(offer.apply.label ?? "Apply here directly")}
+              <ArrowUpRight className="size-4" />
+            </a>
           )}
         </div>
       </div>
