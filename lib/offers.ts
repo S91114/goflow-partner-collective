@@ -23,8 +23,12 @@ export type Offer = {
   secondaryLogo?: string;
   /** Wider frame for horizontal wordmarks. */
   logoLayout?: "wide" | "wordmark" | "ultraWide" | "paired";
+  /** Optional visual scale correction for assets with internal whitespace. */
+  logoScale?: number;
+  /** Dark tile treatment for light or inverted wordmarks. */
+  logoSurface?: "dark";
   /** Color treatment for a monochrome bundled mark. */
-  logoTone?: "target" | "macys" | "newegg" | "aliexpress";
+  logoTone?: "target" | "macys" | "newegg" | "aliexpress" | "inverse";
   /** Lucide mark for Goflow-owned offers without an external brand logo. */
   icon?: "calendar" | "landmark" | "network" | "shield";
   /** Short brand word used when there's no logo asset. */
@@ -57,13 +61,15 @@ export type Offer = {
   apply?: { url: string; label?: string; embed?: boolean };
 };
 
-export const FILTERS = [
-  "All",
+export const CATALOG_TABS = [
   "Marketplaces",
+  "Partner Offers",
   "Retail",
   "Services",
   "Events",
 ] as const;
+
+export type CatalogTab = (typeof CATALOG_TABS)[number];
 
 const CATEGORY_FIELD = (options?: string[]): CollectField =>
   options
@@ -95,6 +101,7 @@ function retailOpportunity({
   brand,
   logo,
   logoLayout,
+  logoScale,
   logoTone,
   wordmark,
   filters = ["Retail"],
@@ -108,6 +115,7 @@ function retailOpportunity({
   brand: string;
   logo?: string;
   logoLayout?: Offer["logoLayout"];
+  logoScale?: number;
   logoTone?: Offer["logoTone"];
   wordmark?: string;
   filters?: string[];
@@ -121,6 +129,7 @@ function retailOpportunity({
     description,
     logo,
     logoLayout,
+    logoScale,
     logoTone,
     wordmark: wordmark ?? name,
     brand,
@@ -412,7 +421,10 @@ export const OFFERS: Offer[] = [
     },
     name: "Nordstrom Marketplace",
     fullName: "Nordstrom Marketplace",
-    logo: "/logos/nordstrom.ico",
+    logo: "/logos/nordstrom.svg",
+    logoLayout: "ultraWide",
+    logoSurface: "dark",
+    logoTone: "inverse",
     brand: "#0A0A0A",
     type: "Marketplace",
     filters: ["Marketplaces"],
@@ -450,6 +462,8 @@ export const OFFERS: Offer[] = [
     name: "AliExpress",
     fullName: "AliExpress Marketplace",
     logo: "/logos/aliexpress.svg",
+    logoLayout: "wide",
+    logoScale: 1.05,
     logoTone: "aliexpress",
     brand: "#E62E04",
     type: "Marketplace",
@@ -512,6 +526,7 @@ export const OFFERS: Offer[] = [
     name: "Temu",
     fullName: "Temu Marketplace",
     logo: "/logos/temu.ico",
+    logoScale: 1.16,
     brand: "#FB7701",
     type: "Marketplace",
     filters: ["Marketplaces"],
@@ -778,7 +793,8 @@ export const OFFERS: Offer[] = [
     id: "best-buy",
     name: "Best Buy",
     website: "https://www.bestbuy.com/seller/signup",
-    logo: "/logos/best-buy.ico",
+    logo: "/logos/best-buy.svg",
+    logoScale: 1.08,
     filters: ["Marketplaces"],
     type: "Marketplace",
     tags: ["Electronics", "Technology", "Home"],

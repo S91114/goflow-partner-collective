@@ -24,6 +24,7 @@ const LOGO_FILTERS: Record<NonNullable<Offer["logoTone"]>, string> = {
     "invert(14%) sepia(97%) saturate(5248%) hue-rotate(353deg) brightness(84%) contrast(116%)",
   newegg:
     "invert(69%) sepia(54%) saturate(710%) hue-rotate(351deg) brightness(100%) contrast(92%)",
+  inverse: "brightness(0) invert(1)",
 };
 
 /**
@@ -39,6 +40,8 @@ export function BrandLogo({
     | "logo"
     | "secondaryLogo"
     | "logoLayout"
+    | "logoScale"
+    | "logoSurface"
     | "logoTone"
     | "icon"
     | "wordmark"
@@ -48,10 +51,19 @@ export function BrandLogo({
   size?: number;
 }) {
   const tileClass = "brand-logo-tile grid flex-none place-items-center rounded-lg";
-  const tileStyle = { "--logo-brand": offer.brand } as CSSProperties;
+  const tileStyle = {
+    "--logo-brand": offer.brand,
+    ...(offer.logoSurface === "dark"
+      ? {
+          background: "#14171b",
+          borderColor: "#14171b",
+          boxShadow: "0 8px 18px -12px rgba(20, 23, 27, 0.8)",
+        }
+      : {}),
+  } as CSSProperties;
   const paired = offer.logoLayout === "paired" && Boolean(offer.secondaryLogo) && size >= 50;
   const wordmark = offer.logoLayout === "wordmark" && size >= 50;
-  const ultraWide = offer.logoLayout === "ultraWide" && size >= 50;
+  const ultraWide = offer.logoLayout === "ultraWide";
   const wide = offer.logoLayout === "wide" || wordmark || ultraWide;
   const width = paired
     ? size * 2 + 8
@@ -63,9 +75,12 @@ export function BrandLogo({
       ? Math.round(size * 2.35)
       : size;
   const height = size;
-  const logoStyle = offer.logoTone
-    ? { filter: LOGO_FILTERS[offer.logoTone] }
-    : undefined;
+  const logoStyle = {
+    ...(offer.logoTone ? { filter: LOGO_FILTERS[offer.logoTone] } : {}),
+    ...(offer.logoScale
+      ? { transform: `scale(${offer.logoScale})`, transformOrigin: "center" }
+      : {}),
+  };
 
   if (offer.logo) {
     if (paired && offer.secondaryLogo) {

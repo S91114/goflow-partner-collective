@@ -1,16 +1,26 @@
 "use client";
 
 import {
+  BadgeCheck,
+  BadgePercent,
+  BriefcaseBusiness,
+  Building2,
   CalendarDays,
   Check,
   ChevronRight,
   Minus,
   Search,
   ShoppingBag,
+  Store,
   X,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState, type CSSProperties } from "react";
-import { FILTERS, findOffer, type Offer } from "@/lib/offers";
+import {
+  CATALOG_TABS,
+  findOffer,
+  type CatalogTab,
+  type Offer,
+} from "@/lib/offers";
 import { displayText } from "@/lib/display-text";
 import { BrandLogo } from "./BrandLogo";
 import { CartRequestForm } from "./CartRequestForm";
@@ -35,7 +45,53 @@ const GENERAL_OFFER: Offer = {
   ],
 };
 
-const CATALOG_ORDER = ["Marketplaces", "Retail", "Services", "Events"];
+const MARKETPLACE_ORDER = [
+  "target-plus",
+  "jcpenney-commission-offer",
+  "nordstrom",
+  "macys",
+  "amazon-nsi",
+  "walmart-nss",
+  "lowes",
+  "newegg",
+  "ulta-beauty",
+  "best-buy",
+  "chewy",
+  "zoro",
+  "kohls",
+  "mathis-home",
+  "aliexpress",
+  "mercado-libre",
+  "shein",
+  "temu",
+  "nocnoc",
+  "walmart-fav",
+  "amazon-mcf-tiktok",
+  "amazon-mcf",
+] as const;
+
+const MARKETPLACE_RANK = new Map<string, number>(
+  MARKETPLACE_ORDER.map((offerId, index) => [offerId, index]),
+);
+
+const PARTNER_OFFER_IDS = new Set([
+  "target-plus",
+  "jcpenney-commission-offer",
+  "nordstrom",
+  "macys",
+  "amazon-mcf-tiktok",
+  "amazon-mcf",
+  "walmart-nss",
+  "goflow-core",
+]);
+
+const TAB_ICONS = {
+  Marketplaces: Store,
+  "Partner Offers": BadgePercent,
+  Retail: Building2,
+  Services: BriefcaseBusiness,
+  Events: CalendarDays,
+} satisfies Record<CatalogTab, typeof Store>;
 
 function resolve(id: string | null): Offer | null {
   if (id === "general") return GENERAL_OFFER;
@@ -45,7 +101,7 @@ function resolve(id: string | null): Offer | null {
 export function CollectiveCatalog({ offers }: { offers: Offer[] }) {
   const [selected, setSelected] = useState<Offer | null>(null);
   const [query, setQuery] = useState("");
-  const [activeFilter, setActiveFilter] = useState("All");
+  const [activeTab, setActiveTab] = useState<CatalogTab>("Marketplaces");
   const [cartIds, setCartIds] = useState<string[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
   const [requestSubmitted, setRequestSubmitted] = useState(false);
@@ -106,8 +162,14 @@ export function CollectiveCatalog({ offers }: { offers: Offer[] }) {
 
   const visibleOffers = useMemo(() => {
     const q = query.trim().toLowerCase();
+    const sourceRank = new Map(offers.map((offer, index) => [offer.id, index]));
+
     return [...offers]
-      .filter((offer) => activeFilter === "All" || offer.filters.includes(activeFilter))
+      .filter((offer) =>
+        activeTab === "Partner Offers"
+          ? PARTNER_OFFER_IDS.has(offer.id)
+          : offer.filters.includes(activeTab),
+      )
       .filter((offer) => {
         if (!q) return true;
         return [
@@ -123,12 +185,16 @@ export function CollectiveCatalog({ offers }: { offers: Offer[] }) {
           .toLowerCase()
           .includes(q);
       })
-      .sort(
-        (a, b) =>
-          CATALOG_ORDER.indexOf(a.filters[0] ?? "Events") -
-          CATALOG_ORDER.indexOf(b.filters[0] ?? "Events"),
-      );
-  }, [activeFilter, offers, query]);
+      .sort((a, b) => {
+        if (activeTab === "Marketplaces" || activeTab === "Partner Offers") {
+          const rankDifference =
+            (MARKETPLACE_RANK.get(a.id) ?? Number.MAX_SAFE_INTEGER) -
+            (MARKETPLACE_RANK.get(b.id) ?? Number.MAX_SAFE_INTEGER);
+          if (rankDifference !== 0) return rankDifference;
+        }
+        return (sourceRank.get(a.id) ?? 0) - (sourceRank.get(b.id) ?? 0);
+      });
+  }, [activeTab, offers, query]);
 
   const selectedOffers = useMemo(
     () => cartIds.map((id) => offers.find((offer) => offer.id === id)).filter(Boolean) as Offer[],
@@ -147,9 +213,9 @@ export function CollectiveCatalog({ offers }: { offers: Offer[] }) {
     }
   }
 
-  function updateFilter(filter: string) {
-    setActiveFilter(filter);
-    track("filter_used", { filter });
+  function updateTab(tab: CatalogTab) {
+    setActiveTab(tab);
+    track("filter_used", { filter: tab });
   }
 
   function addToCart(offer: Offer) {
@@ -187,7 +253,7 @@ export function CollectiveCatalog({ offers }: { offers: Offer[] }) {
   }
 
   return (
-    <div className="min-h-screen overflow-x-hidden">
+    <div className="catalog-shell min-h-screen overflow-x-hidden">
       <header className="sticky top-0 z-40 border-b border-border/80 bg-background/90 backdrop-blur-md">
         <div className="mx-auto flex h-14 max-w-6xl items-center px-4 sm:px-6">
           <div className="flex items-center">
@@ -197,39 +263,73 @@ export function CollectiveCatalog({ offers }: { offers: Offer[] }) {
         </div>
       </header>
 
-      <section className="border-b border-foreground/20 bg-foreground text-background">
-        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:px-6 sm:py-16 lg:grid-cols-[minmax(0,1.1fr)_minmax(23rem,0.9fr)] lg:gap-16">
+      <section className="catalog-hero border-b border-border/80">
+        <div className="mx-auto grid max-w-6xl gap-7 px-4 py-8 sm:px-6 sm:py-10 lg:grid-cols-[minmax(0,1fr)_minmax(32rem,0.95fr)] lg:items-center lg:gap-12">
           <div>
-            <h1 className="text-5xl font-extrabold leading-none tracking-tight sm:text-6xl">
+            <h1 className="text-4xl font-extrabold leading-none tracking-tight sm:text-5xl">
               Goflow
             </h1>
-            <p className="mt-4 text-xl font-medium leading-8 text-background/85 sm:text-2xl">
+            <p className="mt-3 text-lg font-semibold leading-7 text-foreground/85 sm:text-xl">
               Removing friction so sellers can grow.
             </p>
-            <p className="mt-6 max-w-xl text-[15px] leading-7 text-background/70 sm:text-base">
-              Explore every opportunity. Apply directly where an application is available, or send one profile for the introductions you want.
+            <p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground sm:text-[15px]">
+              Explore every opportunity, apply directly, or bundle the introductions you want.
             </p>
           </div>
-          <ol className="grid content-start gap-0 border-t border-background/20 sm:grid-cols-3 lg:grid-cols-1 lg:border-l lg:border-t-0">
+          <ol className="grid grid-cols-3 content-start gap-1.5 sm:gap-2">
             {[
-              ["01", "Explore", "Find the marketplaces, services, and programs for your next move."],
-              ["02", "Apply", "Apply directly inside Goflow whenever an application is available."],
-              ["03", "Connect", "Goflow will be in touch after you submit."],
+              ["01", "Explore", "Find the right channel."],
+              ["02", "Apply", "Apply directly or request an introduction."],
+              ["03", "Connect", "Goflow follows up after you submit."],
             ].map(([number, title, description]) => (
-              <li key={number} className="border-b border-background/20 py-4 sm:border-b-0 sm:pr-4 sm:pt-5 lg:border-b lg:pl-6 lg:pr-0">
-                <p className="text-xs font-bold tracking-[0.16em] text-primary-foreground/55">{number}</p>
-                <h2 className="mt-1 text-base font-extrabold">{title}</h2>
-                <p className="mt-1.5 text-sm leading-5 text-background/65">{description}</p>
+              <li key={number} className="rounded-lg border border-white/80 bg-white/65 px-2.5 py-2.5 shadow-sm backdrop-blur-sm sm:px-4 sm:py-3">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <p className="text-[10px] font-black tracking-[0.14em] text-primary">{number}</p>
+                  <h2 className="text-xs font-extrabold sm:text-sm">{title}</h2>
+                </div>
+                <p className="mt-1 text-[11px] leading-4 text-muted-foreground sm:text-xs sm:leading-5">{description}</p>
               </li>
             ))}
           </ol>
         </div>
       </section>
 
-      <main className="mx-auto max-w-6xl px-4 pb-24 pt-7 sm:px-6 sm:pt-9">
+      <nav className="catalog-tabbar sticky top-14 z-30 border-b border-border/80" aria-label="Catalog sections">
+        <div
+          className="mx-auto flex max-w-6xl gap-6 overflow-x-auto px-4 sm:px-6"
+          role="tablist"
+          aria-label="Browse programs"
+        >
+          {CATALOG_TABS.map((tab) => {
+            const active = activeTab === tab;
+            const Icon = TAB_ICONS[tab];
+            return (
+              <button
+                key={tab}
+                id={`catalog-tab-${tab.toLowerCase().replace(/\s+/g, "-")}`}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                aria-controls="catalog-panel"
+                onClick={() => updateTab(tab)}
+                className={`relative inline-flex shrink-0 items-center gap-2 border-b-2 px-0 py-4 text-sm font-bold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring ${
+                  active
+                    ? "border-primary text-foreground"
+                    : "border-transparent text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Icon className="size-4" />
+                {tab}
+              </button>
+            );
+          })}
+        </div>
+      </nav>
+
+      <main className="mx-auto max-w-6xl px-4 pb-24 pt-6 sm:px-6 sm:pt-8">
         <div className="min-w-0">
-          <div className="mb-7 grid gap-5 border-b border-border pb-7 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
-            <label className="relative block max-w-2xl">
+          <div className="mb-6 flex justify-end">
+            <label className="relative block w-full max-w-xl">
               <Search className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-muted-foreground" />
               <input
                 value={query}
@@ -249,31 +349,13 @@ export function CollectiveCatalog({ offers }: { offers: Offer[] }) {
                 </button>
               )}
             </label>
-            <div className="flex min-w-0 flex-wrap items-center gap-2" role="group" aria-label="Program type">
-              {FILTERS.map((filter) => {
-                const active = activeFilter === filter;
-                return (
-                  <button
-                    key={filter}
-                    type="button"
-                    aria-pressed={active}
-                    onClick={() => updateFilter(filter)}
-                    className={`shrink-0 rounded-full border px-3.5 py-2 text-sm font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring ${
-                      active
-                        ? "border-primary bg-primary text-primary-foreground"
-                        : "border-border bg-background text-muted-foreground hover:border-primary/40 hover:text-foreground"
-                    }`}
-                  >
-                    {filter}
-                  </button>
-                );
-              })}
-            </div>
-            <p className="text-sm font-medium text-muted-foreground" aria-live="polite">
-              {visibleOffers.length} results
-            </p>
           </div>
-          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          <div
+            id="catalog-panel"
+            role="tabpanel"
+            aria-labelledby={`catalog-tab-${activeTab.toLowerCase().replace(/\s+/g, "-")}`}
+            className="grid gap-5 md:grid-cols-2 lg:grid-cols-3"
+          >
             {visibleOffers.map((offer) => (
               <OfferCard
                 key={offer.id}
@@ -368,8 +450,16 @@ function OfferCard({
       }`}
     >
       <div className="absolute inset-x-0 top-0 h-1" style={{ backgroundColor: offer.brand }} aria-hidden />
-      <div className="flex items-start">
-        <BrandLogo offer={offer} size={52} />
+      <div className="flex min-h-[52px] items-start justify-between gap-2">
+        <BrandLogo
+          offer={offer}
+          size={hasDirectApplication && offer.logoLayout === "ultraWide" ? 44 : 52}
+        />
+        {hasDirectApplication && (
+          <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-success/20 bg-success/10 px-2 py-1 text-[10px] font-black uppercase tracking-[0.08em] text-success">
+            <BadgeCheck className="size-3.5" /> Direct Apply
+          </span>
+        )}
       </div>
       <div>
         <h3 className="text-[19px] font-extrabold leading-tight tracking-tight text-balance text-foreground">
