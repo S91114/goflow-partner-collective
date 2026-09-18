@@ -327,6 +327,10 @@ export const OFFERS: Offer[] = [
   {
     id: "target-plus",
     website: "https://lp.goflow.com/sell-on-target-plus-with-goflow/",
+    apply: {
+      url: "https://share.hsforms.com/11LMJrXewTFalUIwYloJSyQ4cwyj",
+      label: "Apply here directly",
+    },
     name: "Target Plus",
     fullName: "Target Plus",
     logo: "/logos/target.svg",
@@ -463,11 +467,6 @@ export const OFFERS: Offer[] = [
   {
     id: "mercado-libre",
     website: "https://global-selling.mercadolibre.com/landing/about",
-    apply: {
-      url: "https://global-selling.mercadolibre.com/landing/about",
-      label: "Apply here directly",
-      embed: false,
-    },
     name: "Mercado Libre",
     fullName: "Mercado Libre Global Selling",
     logo: "/logos/mercado-libre.png",
