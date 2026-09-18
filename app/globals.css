@@ -49,6 +49,32 @@
 }
 
 @layer components {
+  .catalog-shell {
+    background: linear-gradient(
+      180deg,
+      hsl(229 100% 98%) 0,
+      hsl(199 85% 98%) 24rem,
+      hsl(var(--background)) 50rem
+    );
+  }
+
+  .catalog-hero {
+    background:
+      linear-gradient(
+        118deg,
+        rgba(90, 108, 251, 0.12) 0%,
+        rgba(255, 255, 255, 0.72) 48%,
+        rgba(34, 167, 246, 0.1) 78%,
+        rgba(255, 155, 0, 0.07) 100%
+      ),
+      white;
+  }
+
+  .catalog-tabbar {
+    background: color-mix(in srgb, hsl(var(--background)) 90%, transparent);
+    backdrop-filter: blur(14px);
+  }
+
   /* Per-store brand glow on card hover (brand color set inline via --brand). */
   .offer-card {
     transition:

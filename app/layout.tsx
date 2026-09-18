@@ -19,6 +19,9 @@ const inter = localFont({
 export const metadata: Metadata = {
   title: "Goflow",
   description: "Removing friction so sellers can grow.",
+  icons: {
+    icon: "/goflow-mark.svg",
+  },
 };
 
 export default function RootLayout({
