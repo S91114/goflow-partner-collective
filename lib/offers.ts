@@ -728,8 +728,8 @@ export const OFFERS: Offer[] = [
   {
     id: "partner-dinners",
     website: "https://www.goflow.com/",
-    name: "Exclusive Events",
-    fullName: "Great Exclusive Events",
+    name: "Exclusive Dinner",
+    fullName: "Exclusive Dinner",
     icon: "calendar",
     brand: "#FF9B00",
     type: "Events",
