@@ -8,6 +8,7 @@ import {
   CalendarDays,
   Check,
   ChevronRight,
+  LayoutGrid,
   Minus,
   Search,
   ShoppingBag,
@@ -86,6 +87,7 @@ const PARTNER_OFFER_IDS = new Set([
 ]);
 
 const TAB_ICONS = {
+  All: LayoutGrid,
   Marketplaces: Store,
   "Partner Offers": BadgePercent,
   Retail: Building2,
@@ -101,7 +103,7 @@ function resolve(id: string | null): Offer | null {
 export function CollectiveCatalog({ offers }: { offers: Offer[] }) {
   const [selected, setSelected] = useState<Offer | null>(null);
   const [query, setQuery] = useState("");
-  const [activeTab, setActiveTab] = useState<CatalogTab>("Marketplaces");
+  const [activeTab, setActiveTab] = useState<CatalogTab>("All");
   const [cartIds, setCartIds] = useState<string[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
   const [requestSubmitted, setRequestSubmitted] = useState(false);
@@ -166,7 +168,9 @@ export function CollectiveCatalog({ offers }: { offers: Offer[] }) {
 
     return [...offers]
       .filter((offer) =>
-        activeTab === "Partner Offers"
+        activeTab === "All"
+          ? true
+          : activeTab === "Partner Offers"
           ? PARTNER_OFFER_IDS.has(offer.id)
           : offer.filters.includes(activeTab),
       )
@@ -186,7 +190,11 @@ export function CollectiveCatalog({ offers }: { offers: Offer[] }) {
           .includes(q);
       })
       .sort((a, b) => {
-        if (activeTab === "Marketplaces" || activeTab === "Partner Offers") {
+        if (
+          activeTab === "All" ||
+          activeTab === "Marketplaces" ||
+          activeTab === "Partner Offers"
+        ) {
           const rankDifference =
             (MARKETPLACE_RANK.get(a.id) ?? Number.MAX_SAFE_INTEGER) -
             (MARKETPLACE_RANK.get(b.id) ?? Number.MAX_SAFE_INTEGER);
