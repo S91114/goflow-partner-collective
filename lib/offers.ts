@@ -62,6 +62,7 @@ export type Offer = {
 };
 
 export const CATALOG_TABS = [
+  "All",
   "Marketplaces",
   "Partner Offers",
   "Retail",
