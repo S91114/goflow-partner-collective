@@ -24,6 +24,7 @@ export const runtime = "nodejs";
 
 const requestTypes = new Set(["apply", "learn_more", "join", "general"]);
 const offerNamesById = new Map(OFFERS.map((offer) => [offer.id, offer.fullName]));
+const NON_DIRECT_REQUEST_CC = "mason.martinez@kudosnets.com";
 
 export async function POST(request: Request) {
   let body: Record<string, unknown>;
@@ -188,9 +189,11 @@ export async function POST(request: Request) {
       ...attribution,
     });
 
+    const internalCc = offer?.apply ? undefined : [NON_DIRECT_REQUEST_CC];
     const internalSubject = `New ${offerName} request - ${company}`;
     const internalEmail = await notifyByEmail({
       subject: internalSubject,
+      cc: internalCc,
       title: "New Goflow Growth Engine program request",
       intro: `${name} from ${company} submitted a ${requestType.replace("_", " ")} request for ${offerName}.`,
       rows: {
@@ -216,7 +219,12 @@ export async function POST(request: Request) {
         subject: internalSubject,
         status: internalEmail.status,
         error: internalEmail.error,
-        metadata: { offerId, offerName, requestType },
+        metadata: {
+          offerId,
+          offerName,
+          requestType,
+          cc: internalCc ?? [],
+        },
       });
     }
 

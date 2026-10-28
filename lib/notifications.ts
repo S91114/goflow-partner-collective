@@ -13,11 +13,13 @@ export async function notifyByEmail({
   title,
   intro,
   rows,
+  cc,
 }: {
   subject: string;
   title: string;
   intro: string;
   rows: Record<string, string | null | undefined>;
+  cc?: string[];
 }): Promise<EmailSendResult> {
   const rowHtml = Object.entries(rows)
     .filter(([, value]) => value)
@@ -29,6 +31,7 @@ export async function notifyByEmail({
 
   return sendEmail({
     to: [NOTIFY_TO],
+    cc,
     subject,
     html: `
       <h2>${escapeHtml(title)}</h2>
@@ -94,11 +97,13 @@ export async function sendLeadConfirmationEmail({
 
 async function sendEmail({
   to,
+  cc,
   subject,
   html,
   logLabel,
 }: {
   to: string[];
+  cc?: string[];
   subject: string;
   html: string;
   logLabel: string;
@@ -119,6 +124,7 @@ async function sendEmail({
       body: JSON.stringify({
         from,
         to,
+        ...(cc?.length ? { cc } : {}),
         subject,
         html,
       }),
